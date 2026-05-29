@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="北斗判別">
+<meta name="theme-color" content="#c9a227">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>スマスロ北斗の拳 設定判別機</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Antique+Soft&family=Noto+Sans+JP:wght@300;400;700;900&display=swap');
+  :root{
+    --gold:#c9a227;--gold-light:#f0d060;
+    --red:#cc2200;--red-bright:#ff3311;
+    --bg:#0a0704;--bg2:#120e08;--bg3:#1c160e;
+    --border:#3a2c14;--text:#e8dcc0;--text-dim:#8a7a58;
+    --green:#4ab84a;--blue:#4a8aff;
+    --radius:6px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Noto Sans JP',sans-serif;min-height:100vh;
+    padding-top:var(--safe-top);
+    padding-bottom:var(--safe-bottom);
+    background-image:
+      radial-gradient(ellipse at 50% 0%,rgba(201,162,39,.07) 0%,transparent 55%),
+      repeating-linear-gradient(0deg,transparent,transparent 48px,rgba(58,44,20,.12) 48px,rgba(58,44,20,.12) 49px),
+      repeating-linear-gradient(90deg,transparent,transparent 48px,rgba(58,44,20,.12) 48px,rgba(58,44,20,.12) 49px);
+  }
+  header{
+    text-align:center;padding:14px 12px 10px;
+    border-bottom:1px solid var(--border);
+    position:relative;overflow:hidden;
+  }
+  header::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% -20%,rgba(201,162,39,.15) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .title-en{font-size:8px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;}
+  .title-jp{font-family:'Zen Antique Soft',serif;font-size:20px;color:var(--gold-light);text-shadow:0 0 28px rgba(201,162,39,.5);line-height:1.2;}
+  .title-sub{font-size:9px;color:var(--text-dim);margin-top:2px;letter-spacing:2px;}
+  .container{max-width:640px;margin:0 auto;padding:8px 10px;}
+  .section-label{
+    font-size:8px;letter-spacing:3px;color:var(--text-dim);
+    text-transform:uppercase;padding:7px 4px 3px;
+    border-top:1px solid var(--border);
+    margin-bottom:5px;margin-top:2px;
+  }
+  .section-label:first-child{border-top:none;padding-top:0;}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:7px;overflow:hidden;}
+  .card-header{background:linear-gradient(90deg,var(--bg3),var(--bg2));border-bottom:1px solid var(--border);padding:6px 12px;display:flex;align-items:center;gap:6px;}
+  .card-header .icon{font-size:12px;line-height:1;}
+  .card-header h2{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+  .card-body{padding:9px 12px;}
+  #result-panel{background:var(--bg2);border:2px solid var(--gold);border-radius:var(--radius);overflow:hidden;margin-bottom:7px;box-shadow:0 0 24px rgba(201,162,39,.12);}
+  .rp-header{background:linear-gradient(90deg,rgba(201,162,39,.22),rgba(201,162,39,.04));padding:7px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+  .rp-header h2{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+  .rp-header .update-time{font-size:9px;color:var(--text-dim);}
+  .setting-bars{padding:9px 12px;}
+  .setting-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .setting-row:last-child{margin-bottom:0;}
+  .setting-label{font-size:12px;font-weight:700;color:var(--text-dim);width:40px;flex-shrink:0;}
+  .setting-label.highlight{color:var(--gold-light);}
+  .bar-wrap{flex:1;background:var(--bg);border-radius:2px;height:15px;overflow:hidden;border:1px solid var(--border);}
+  .bar-fill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+  .bar-pct{font-size:11px;font-weight:700;width:42px;text-align:right;flex-shrink:0;}
+  .best-guess{padding:7px 12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:rgba(201,162,39,.04);}
+  .best-guess .label{font-size:10px;color:var(--text-dim);margin-bottom:2px;}
+  .best-guess .value{font-family:'Zen Antique Soft',serif;font-size:20px;color:var(--gold-light);text-shadow:0 0 14px rgba(240,208,96,.4);}
+  .best-guess .rtp{font-size:13px;color:var(--gold-light);font-weight:700;}
+  .signs-header{padding:5px 12px;border-top:1px solid var(--border);background:linear-gradient(90deg,var(--bg3),var(--bg2));display:flex;align-items:center;gap:6px;}
+  .signs-header span{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:1px;}
+  .signs-area{padding:7px 10px;display:flex;flex-wrap:wrap;gap:4px;}
+  .sign-tag{padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;border:1px solid;line-height:1.5;}
+  .sign-tag.red {border-color:var(--red-bright);color:var(--red-bright);background:rgba(204,34,0,.08);}
+  .sign-tag.gold{border-color:var(--gold);color:var(--gold);background:rgba(201,162,39,.08);}
+  .sign-tag.blue{border-color:var(--blue);color:var(--blue);background:rgba(74,138,255,.08);}
+  .sign-tag.gray{border-color:var(--border);color:var(--text-dim);background:transparent;}
+  .stats-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .stats-table th{background:var(--bg3);color:var(--text-dim);font-weight:700;padding:4px 8px;text-align:left;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:.5px;}
+  .stats-table td{padding:4px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .stats-table tr:last-child td{border-bottom:none;}
+  .stats-table .td-label{color:var(--text-dim);font-size:11px;width:50%;}
+  .stats-table .td-val{text-align:right;font-weight:900;font-size:13px;color:var(--gold-light);}
+  .stats-table .td-sub{text-align:right;font-size:10px;color:var(--text-dim);padding-left:4px;white-space:nowrap;}
+  .td-val.good{color:var(--green);}
+  .td-val.bad{color:var(--red-bright);}
+  .td-val.gold-v{color:var(--gold-light);}
+  .td-val.normal{color:var(--text);}
+  .stats-section-head{background:rgba(201,162,39,.08);}
+  .input-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:10px;color:var(--text-dim);}
+  .field input{background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:700;padding:6px 8px;width:100%;text-align:right;transition:border-color .2s;}
+  .field input:focus{outline:none;border-color:var(--gold);}
+  .field input::placeholder{color:var(--border);font-size:13px;}
+
+  .counter-block{margin-bottom:7px;}
+  .counter-block:last-child{margin-bottom:0;}
+  .counter-row{display:flex;align-items:center;gap:6px;}
+  .counter-row label{flex:1;font-size:11px;color:var(--text-dim);line-height:1.3;}
+  .cnt-val{background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--gold-light);font-size:16px;font-weight:900;width:52px;text-align:center;padding:3px 0;font-family:'Noto Sans JP',sans-serif;cursor:text;flex-shrink:0;}
+  .cnt-val:focus{outline:none;border-color:var(--gold);}
+  .cnt-btn{background:var(--bg3);border:1px solid var(--border);color:var(--gold);font-size:16px;width:32px;height:32px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
+  .cnt-btn:active{background:var(--gold);color:var(--bg);}
+  .gozan-mini{font-size:11px;color:var(--text-dim);margin-top:2px;padding-left:2px;min-height:13px;}
+  .gozan-mini span{color:var(--gold-light);font-weight:700;}
+  .fh-total-row{display:flex;align-items:center;justify-content:space-between;background:rgba(201,162,39,.08);border:1px solid var(--gold);border-radius:4px;padding:6px 10px;margin-top:7px;flex-wrap:wrap;gap:4px;}
+  .ft-label{font-size:11px;color:var(--gold);font-weight:700;}
+  .ft-gozan{font-size:11px;color:var(--text-dim);}
+  .ft-val{font-size:17px;font-weight:900;color:var(--gold-light);}
+  .voice-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .voice-table th{background:var(--bg3);color:var(--text-dim);font-weight:700;padding:4px 8px;text-align:left;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:.5px;}
+  .voice-table td{padding:4px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  .voice-table tr:last-child td{border-bottom:none;}
+  .chara-name{font-weight:700;white-space:nowrap;}
+  .serif-text{font-size:10px;color:var(--text-dim);line-height:1.3;}
+  .badge-default{color:var(--text-dim);font-size:10px;}
+  .badge-weak{color:var(--blue);font-size:10px;}
+  .badge-mid{color:var(--gold);font-size:10px;}
+  .badge-strong{color:var(--red-bright);font-size:10px;}
+  .badge-4up{color:#a0e0a0;font-size:10px;}
+  .badge-5up{color:var(--gold-light);font-size:10px;}
+  .badge-1g{color:var(--red-bright);font-weight:900;font-size:10px;}
+  .cnt-voice{background:var(--bg);border:1px solid var(--border);border-radius:3px;color:var(--gold-light);font-size:16px;font-weight:900;width:44px;text-align:center;padding:3px 0;font-family:'Noto Sans JP',sans-serif;cursor:text;flex-shrink:0;}
+  .cnt-voice:focus{outline:none;border-color:var(--gold);}
+  .cnt-btn-sm{background:var(--bg3);border:1px solid var(--border);color:var(--gold);font-size:14px;width:24px;height:24px;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;}
+  .cnt-btn-sm:active{background:var(--gold);color:var(--bg);}
+  .reset-btn{width:100%;padding:9px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-size:11px;cursor:pointer;letter-spacing:3px;font-family:'Noto Sans JP',sans-serif;transition:all .2s;margin-bottom:10px;margin-top:4px;}
+  .reset-btn:hover{border-color:var(--red);color:var(--red);}
+  footer{text-align:center;padding:8px;font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+  /* ===== 固定フローティングパネル ===== */
+  #float-panel{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    background:var(--bg2);border-bottom:2px solid var(--gold);
+    box-shadow:0 2px 16px rgba(0,0,0,.6);
+    padding-top:var(--safe-top);
+  }
+  #float-toggle{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;cursor:pointer;gap:8px;
+    background:linear-gradient(90deg,rgba(201,162,39,.18),rgba(201,162,39,.04));
+    user-select:none;-webkit-user-select:none;
+  }
+  #float-summary{display:flex;align-items:baseline;gap:8px;flex:1;}
+  #float-setting{font-family:'Zen Antique Soft',serif;font-size:18px;color:var(--gold-light);font-weight:900;text-shadow:0 0 10px rgba(240,208,96,.4);}
+  #float-rtp{font-size:11px;color:var(--text-dim);}
+  #float-signs-row{flex:1;display:flex;flex-wrap:wrap;gap:4px;margin-left:4px;}
+  #float-arrow{font-size:10px;color:var(--gold);flex-shrink:0;transition:transform .2s;}
+  #float-arrow.open{transform:rotate(180deg);}
+  #float-body{display:none;border-top:1px solid var(--border);max-height:60vh;overflow-y:auto;}
+  #float-body.open{display:block;}
+</style>
+</head>
+<body>
+
+<!-- 固定表示パネル -->
+<div id="float-panel">
+  <div id="float-toggle" onclick="toggleFloat()">
+    <div id="float-summary">
+      <span id="float-setting">設定 ―</span>
+      <span id="float-rtp"></span>
+    </div>
+    <div id="float-signs-row" style="display:none;"></div>
+    <span id="float-arrow">▼</span>
+  </div>
+  <div id="float-body">
+    <div class="setting-bars" id="setting-bars"></div>
+    <div class="signs-header"><span>⚡ 挙動サイン</span></div>
+    <div class="signs-area" id="signs-area" style="min-height:60px;align-content:flex-start;">
+      <span class="sign-tag gray">データを入力すると判定します</span>
+    </div>
+  </div>
+</div>
+<!-- パネル高さ分のスペーサー -->
+<div id="float-spacer"></div>
+
+<header>
+  <div class="title-jp">スマスロ北斗の拳</div>
+  <div class="title-sub">設定推測ツール</div>
+</header>
+
+<div class="container">
+
+  <div class="section-label">データ入力</div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🎰</span><h2>ゲーム数</h2></div>
+    <div class="card-body">
+      <div class="input-grid">
+        <div class="field">
+          <label>総ゲーム数（小役計算用）</label>
+          <input type="number" id="total-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()">
+        </div>
+        <div class="field">
+          <label>通常ゲーム数（初当たり計算用）</label>
+          <input type="number" id="normal-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🎯</span><h2>小役カウント</h2></div>
+    <div class="card-body" id="counters-body"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">💥</span><h2>初当たり内訳</h2></div>
+    <div class="card-body">
+      <div id="first-hit-counters"></div>
+      <div class="fh-total-row">
+        <span class="ft-label">合計初当たり回数</span>
+        <span class="ft-gozan" id="fh-gozan">通常G入力で合算表示</span>
+        <span class="ft-val" id="fh-total">0回</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🔄</span><h2>天国スタート</h2></div>
+    <div class="card-body">
+      <div class="counter-block">
+        <div class="counter-row">
+          <label>🌟 AT後天国スタート回数</label>
+          <button class="cnt-btn" onclick="dec('tenkou_start')">−</button>
+          <div class="cnt-val" id="cnt-tenkou_start" contenteditable="true" inputmode="numeric"
+            onfocus="selectAll(this)"
+            onblur="setFromEdit('tenkou_start',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+          <button class="cnt-btn" onclick="inc('tenkou_start')">＋</button>
+        </div>
+        <div class="gozan-mini" id="gz-tenkou"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">🎙</span><h2>ボイス</h2></div>
+    <div class="card-body" style="padding:8px 10px;">
+      <table class="voice-table" id="voice-table"></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="icon">📊</span><h2>実績データ</h2></div>
+    <div id="derived-stats"></div>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">⟳ &nbsp; リセット</button>
+  <footer>※ 本ツールは内部仕様データを基にした参考ツールです。設定確定要素ではありません。</footer>
+</div>
+
+<script>
+// ===== フローティングパネル =====
+let floatOpen = false;
+function toggleFloat(){
+  floatOpen = !floatOpen;
+  document.getElementById('float-body').classList.toggle('open', floatOpen);
+  document.getElementById('float-arrow').classList.toggle('open', floatOpen);
+  document.getElementById('float-signs-row').style.display = floatOpen ? 'none' : 'flex';
+  adjustSpacer();
+}
+function adjustSpacer(){
+  const h = document.getElementById('float-panel').offsetHeight;
+  document.getElementById('float-spacer').style.height = h + 'px';
+}
+window.addEventListener('resize', adjustSpacer);
+window.addEventListener('load', ()=>{ setTimeout(adjustSpacer, 100); });
+
+// floatパネルのサイン行を更新
+function updateFloatSigns(){
+  const area = document.getElementById('signs-area');
+  const row  = document.getElementById('float-signs-row');
+  if(!floatOpen && area){
+    // 赤タグのみ最大3件表示
+    const tags = Array.from(area.querySelectorAll('.sign-tag.red'));
+    const showing = tags.slice(0,3);
+    row.innerHTML = showing.map(t=>t.outerHTML).join('');
+    row.style.display = showing.length ? 'flex' : 'none';
+  }
+  adjustSpacer();
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+
+// ===== データ定数 =====
+const SETTINGS=[1,2,4,5,6];
+const RTP={1:98.0,2:98.9,4:105.7,5:110.0,6:113.0};
+const FIRST_HIT_RATE  ={1:1/383.4,2:1/370.5,4:1/297.8,5:1/258.7,6:1/235.1};
+const WEAK_SUIKA_RATE ={1:1/109.0,2:1/108.7,4:1/105.9,5:1/100.7,6:1/98.3};
+const STRONG_SUIKA_RATE={1:1/546.1,2:1/537.2,4:1/489.1,5:1/448.9,6:1/425.6};
+const MID_CHERRY_RATE ={1:1/1638.4,2:1/1307.2,4:1/1092.3,5:1/936.2,6:1/819.2};
+const MID_BELL_RATE   ={1:1/220,2:1/200,4:1/170,5:1/145,6:1/120};
+const TENKOU_RATE     ={1:0.2582,2:0.2582,4:0.3024,5:0.3380,6:0.3594};
+// 強チェリー合算（画像データ: 設定1=1/546.1, 設定6=1/425.6）
+const STRONG_CHERRY_RATE={1:1/546.1,2:1/537.2,4:1/489.1,5:1/448.9,6:1/425.6};
+const LS_KEY = 'hokuto_state_v1';
+
+const VOICE_DEFS=[
+  {id:'v_shin',   chara:'シン',      serif:'北斗神拳は無敵ではない',          badge:'badge-weak',   hint:'高設定示唆（弱）'},
+  {id:'v_souther',chara:'サウザー',  serif:'退かぬ！媚びぬ！省みぬ！',        badge:'badge-weak',   hint:'高設定示唆（弱）'},
+  {id:'v_jagi',   chara:'ジャギ',    serif:'ケンシロウ 俺の名を言ってみろ！', badge:'badge-mid',    hint:'高設定示唆（中）'},
+  {id:'v_amiba',  chara:'アミバ',    serif:'ふむ…この秘孔ではないらしい…',   badge:'badge-strong', hint:'高設定示唆（強）'},
+  {id:'v_ken1',   chara:'ケンシロウ',serif:'北斗神拳伝承者の宿命だ！',        badge:'badge-4up',    hint:'設定4以上の期待大'},
+  {id:'v_yuria',  chara:'ユリア',    serif:'待ち続けるのが私の宿命',          badge:'badge-5up',    hint:'設定5以上の期待大'},
+];
+
+const counterDefs=[
+  {id:'mid_bell',    label:'共通ベル',          icon:'🔔',gozanId:'gz-mid-bell'},
+  {id:'weak_suika',  label:'弱スイカ',           icon:'🍉',gozanId:'gz-weak-suika'},
+  {id:'strong_suika',label:'強スイカ',           icon:'🍉',gozanId:'gz-strong-suika'},
+  {id:'strong_cherry',label:'強チェリー',        icon:'🍒',gozanId:'gz-strong-cherry'},
+  {id:'tokutei',     label:'特定役（リーチ目）', icon:'⭐',gozanId:'gz-tokutei'},
+];
+
+const firstHitDefs=[
+  {id:'fh_chansu',      label:'チャンス目当選',   icon:'🎯'},
+  {id:'fh_weak_suika',  label:'弱スイカ当選',     icon:'🍉'},
+  {id:'fh_strong_suika',label:'強スイカ当選',     icon:'🍉'},
+  {id:'fh_weak_cherry', label:'弱チェリー当選',   icon:'🍒'},
+  {id:'fh_mid_cherry',  label:'強チェリー当選',   icon:'🍒'},
+  {id:'fh_nazo',        label:'謎当たり当選',     icon:'❓'},
+  {id:'fh_tokutei',     label:'特定役当選',       icon:'⭐'},
+  {id:'fh_tenjo',       label:'仮天井当選',       icon:'🏔'},
+];
+
+// ===== STATE =====
+let state={};
+
+function defaultState(){
+  const s={
+    total_g:0,normal_g:0,tenkou_start:0,
+    mid_bell:0,weak_suika:0,strong_suika:0,strong_cherry:0,tokutei:0,nazo:0,
+    fh_chansu:0,fh_weak_suika:0,fh_strong_suika:0,
+    fh_weak_cherry:0,fh_mid_cherry:0,fh_nazo:0,fh_tokutei:0,fh_tenjo:0,
+  };
+  VOICE_DEFS.forEach(d=>s[d.id]=0);
+  return s;
+}
+
+// localStorage 保存・読み込み
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+}
+function loadState(){
+  try{
+    const saved=localStorage.getItem(LS_KEY);
+    if(saved) state=Object.assign(defaultState(), JSON.parse(saved));
+    else state=defaultState();
+  }catch(e){ state=defaultState(); }
+}
+
+// ===== UI BUILDER =====
+function buildYakuCounters(){
+  const body=document.getElementById('counters-body');
+  body.innerHTML='';
+  counterDefs.forEach(d=>{
+    const block=document.createElement('div');
+    block.className='counter-block';
+    block.innerHTML=`
+      <div class="counter-row">
+        <label>${d.icon} ${d.label}</label>
+        <button class="cnt-btn" onclick="dec('${d.id}')">−</button>
+        <div class="cnt-val" id="cnt-${d.id}" contenteditable="true" inputmode="numeric"
+          onfocus="selectAll(this)"
+          onblur="setFromEdit('${d.id}',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+        <button class="cnt-btn" onclick="inc('${d.id}')">＋</button>
+      </div>
+      <div class="gozan-mini" id="${d.gozanId}"></div>
+    `;
+    body.appendChild(block);
+  });
+}
+
+function buildFhCounters(){
+  const el=document.getElementById('first-hit-counters');
+  el.innerHTML='';
+  firstHitDefs.forEach(d=>{
+    const block=document.createElement('div');
+    block.className='counter-block';
+    block.innerHTML=`
+      <div class="counter-row">
+        <label>${d.icon} ${d.label}</label>
+        <button class="cnt-btn" onclick="dec('${d.id}')">−</button>
+        <div class="cnt-val" id="cnt-${d.id}" contenteditable="true" inputmode="numeric"
+          onfocus="selectAll(this)"
+          onblur="setFromEdit('${d.id}',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+        <button class="cnt-btn" onclick="inc('${d.id}')">＋</button>
+      </div>
+    `;
+    el.appendChild(block);
+  });
+}
+
+function buildVoiceTable(){
+  const tbl=document.getElementById('voice-table');
+  tbl.innerHTML=`<tr>
+    <th style="width:72px;">キャラ</th>
+    <th>示唆</th>
+    <th style="width:84px;text-align:center;">回数</th>
+  </tr>`;
+  VOICE_DEFS.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td class="chara-name" style="font-size:12px;">${d.chara}</td>
+      <td class="${d.badge}" style="font-size:11px;">${d.hint}</td>
+      <td style="text-align:center;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
+          <button class="cnt-btn-sm" onclick="dec('${d.id}')">−</button>
+          <div class="cnt-voice" id="cnt-${d.id}" contenteditable="true" inputmode="numeric"
+            onfocus="selectAll(this)"
+            onblur="setFromEdit('${d.id}',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+          <button class="cnt-btn-sm" onclick="inc('${d.id}')">＋</button>
+        </div>
+      </td>
+    `;
+    tbl.appendChild(tr);
+  });
+}
+
+// 保存されたstateをUIに反映
+function applyStateToUI(){
+  document.getElementById('total-g').value = state.total_g||'';
+  document.getElementById('normal-g').value = state.normal_g||'';
+  // カウンター
+  document.getElementById('cnt-tenkou_start').textContent = state.tenkou_start||0;
+  [...counterDefs,...firstHitDefs,...VOICE_DEFS].forEach(d=>{
+    const el=document.getElementById('cnt-'+d.id);
+    if(el) el.textContent = state[d.id]||0;
+  });
+}
+
+// ===== EVENTS =====
+['total-g','normal-g'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',e=>{
+    state[id.replace('-','_')]=parseInt(e.target.value)||0;
+    saveState(); compute();
+  });
+});
+
+function inc(id){state[id]=(state[id]||0)+1;document.getElementById('cnt-'+id).textContent=state[id];saveState();compute();}
+function dec(id){state[id]=Math.max(0,(state[id]||0)-1);document.getElementById('cnt-'+id).textContent=state[id];saveState();compute();}
+function setFromEdit(id,el){const v=parseInt(el.textContent)||0;state[id]=Math.max(0,v);el.textContent=state[id];saveState();compute();}
+function selectAll(el){
+  setTimeout(()=>{
+    const range=document.createRange();
+    range.selectNodeContents(el);
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  },0);
+}
+
+// ===== COMPUTE =====
+function compute(){
+  const ng=state.normal_g||0;
+  const tg=state.total_g||0;
+
+  counterDefs.forEach(d=>{
+    const el=document.getElementById(d.gozanId);
+    if(!el)return;
+    const cnt=state[d.id]||0;
+    el.innerHTML=tg>0&&cnt>0?`合算: <span>1/${Math.round(tg/cnt).toLocaleString()}</span>（総G）`:'';
+  });
+
+  const totalFH=firstHitDefs.reduce((a,d)=>a+(state[d.id]||0),0);
+  const tkEl=document.getElementById('gz-tenkou');
+  if(totalFH>0&&state.tenkou_start>0){
+    const r=((state.tenkou_start/totalFH)*100).toFixed(1);
+    tkEl.innerHTML=`天国率: <span>${r}%</span>（設定1≒25.8%　設定6≒35.9%）`;
+  }else{tkEl.textContent='';}
+
+  document.getElementById('fh-total').textContent=totalFH+'回';
+  if(ng>0&&totalFH>0){
+    document.getElementById('fh-gozan').textContent='合算: 1/'+Math.round(ng/totalFH).toLocaleString()+'（通常G）';
+  }else{
+    document.getElementById('fh-gozan').textContent='通常G入力で合算表示';
+  }
+
+  let scores={};
+  SETTINGS.forEach(s=>scores[s]=1.0);
+
+  // 【初当たり合算】信頼度高め・サンプル数で精度調整
+  if(ng>0&&totalFH>0){
+    const a=totalFH/ng;
+    const spread=totalFH>=15?0.18:totalFH>=8?0.24:totalFH>=4?0.30:0.40;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,FIRST_HIT_RATE[s],spread));
+  }
+
+  // 【共通ベル】最重要小役指標・3000G以降で安定
+  if(tg>=300&&state.mid_bell>0){
+    const a=state.mid_bell/tg;
+    const spread=tg>=3000?0.18:tg>=1500?0.26:tg>=600?0.36:0.48;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,MID_BELL_RATE[s],spread));
+  }
+
+  // 【弱スイカ】参考程度・3000G以降でやや反映
+  if(tg>=3000&&state.weak_suika>0){
+    const a=state.weak_suika/tg;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,WEAK_SUIKA_RATE[s],0.65));
+  }
+
+  // 【強スイカ】参考程度・3000G以降でやや反映
+  if(tg>=3000&&state.strong_suika>0){
+    const a=state.strong_suika/tg;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,STRONG_SUIKA_RATE[s],0.60));
+  }
+
+  // 【強チェリー】参考程度・3000G以降でやや反映
+  if(tg>=3000&&state.strong_cherry>0){
+    const a=state.strong_cherry/tg;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,STRONG_CHERRY_RATE[s],0.60));
+  }
+
+  // 【天国スタート率】回数少ないと信頼度低い
+  if(totalFH>=5){
+    const a=(state.tenkou_start||0)/totalFH;
+    const spread=totalFH>=10?0.30:0.45;
+    SETTINGS.forEach(s=>scores[s]*=lh(a,TENKOU_RATE[s],spread));
+  }
+
+  // 【特定役（リーチ目）】強い要素だが低設定でも起こりうる
+  const tok=state.tokutei||0;
+  if(tok>=1){scores[4]*=1.5;scores[5]*=1.7;scores[6]*=1.9;scores[1]*=0.50;scores[2]*=0.60;}
+  if(tok>=2){scores[4]*=1.3;scores[5]*=1.5;scores[6]*=1.7;scores[1]*=0.55;scores[2]*=0.65;}
+
+  // 【謎当たり】強い要素だが低設定でも起こりうる
+  const naz=state.fh_nazo||0;
+  if(naz>=1){scores[4]*=1.6;scores[5]*=1.9;scores[6]*=2.1;scores[1]*=0.40;scores[2]*=0.50;}
+  if(naz>=2){scores[4]*=1.3;scores[5]*=1.6;scores[6]*=1.8;scores[1]*=0.45;scores[2]*=0.55;}
+
+  // 【仮天井当選】発生だけで高設定の期待大
+  const tenjo=state.fh_tenjo||0;
+  if(tenjo>=1){scores[4]*=1.6;scores[5]*=1.9;scores[6]*=2.2;scores[1]*=0.30;scores[2]*=0.40;}
+  if(tenjo>=2){scores[4]*=1.4;scores[5]*=1.6;scores[6]*=1.8;scores[1]*=0.40;scores[2]*=0.50;}
+
+  // 【チャンス目当選】高設定示唆
+  const chansu=state.fh_chansu||0;
+  if(chansu>=1){scores[4]*=1.3;scores[5]*=1.5;scores[6]*=1.7;scores[1]*=0.55;scores[2]*=0.65;}
+  if(chansu>=2){scores[4]*=1.2;scores[5]*=1.4;scores[6]*=1.6;scores[1]*=0.60;scores[2]*=0.70;}
+
+  // 【弱スイカ当選（初当たり）】高設定示唆
+  const fhWS=state.fh_weak_suika||0;
+  if(fhWS>=1){scores[4]*=1.2;scores[5]*=1.4;scores[6]*=1.5;scores[1]*=0.65;scores[2]*=0.75;}
+  if(fhWS>=2){scores[4]*=1.2;scores[5]*=1.3;scores[6]*=1.4;scores[1]*=0.65;scores[2]*=0.75;}
+
+  // 【弱チェリー当選（初当たり）】高設定示唆
+  const fhWC=state.fh_weak_cherry||0;
+  if(fhWC>=1){scores[4]*=1.2;scores[5]*=1.4;scores[6]*=1.5;scores[1]*=0.65;scores[2]*=0.75;}
+  if(fhWC>=2){scores[4]*=1.2;scores[5]*=1.3;scores[6]*=1.4;scores[1]*=0.65;scores[2]*=0.75;}
+
+  // 【シン・サウザー】あまり当てにならない・参考程度
+  const weakVoice=(state.v_shin||0)+(state.v_souther||0);
+  if(weakVoice>=1){scores[1]*=0.90;scores[2]*=0.92;}
+  if(weakVoice>=2){scores[1]*=0.88;scores[2]*=0.90;scores[4]*=1.05;scores[5]*=1.08;scores[6]*=1.08;}
+
+  // 【ジャギ】少し期待
+  const jagi=state.v_jagi||0;
+  if(jagi>=1){scores[4]*=1.3;scores[5]*=1.4;scores[6]*=1.5;scores[1]*=0.75;scores[2]*=0.80;}
+
+  // 【アミバ】期待できる
+  const amiba=state.v_amiba||0;
+  if(amiba>=1){scores[4]*=1.6;scores[5]*=1.7;scores[6]*=1.8;scores[1]*=0.40;scores[2]*=0.50;}
+  if(amiba>=2){scores[4]*=1.5;scores[5]*=1.6;scores[6]*=1.7;}
+
+  // 【ケンシロウ「宿命」】ほぼ設定4以上
+  const ken1=state.v_ken1||0;
+  if(ken1>=1){scores[4]*=2.5;scores[5]*=2.8;scores[6]*=3.0;scores[1]*=0.10;scores[2]*=0.18;}
+
+  // 【ユリア】ほぼ設定5以上
+  const yuria=state.v_yuria||0;
+  if(yuria>=1){scores[5]*=3.0;scores[6]*=3.5;scores[1]*=0.05;scores[2]*=0.10;scores[4]*=0.30;}
+
+  const total=SETTINGS.reduce((a,s)=>a+scores[s],0);
+  const probs={};
+  SETTINGS.forEach(s=>probs[s]=total>0?scores[s]/total:0.2);
+  let bestSetting=1,bestProb=0;
+  SETTINGS.forEach(s=>{if(probs[s]>bestProb){bestProb=probs[s];bestSetting=s;}});
+
+  renderBars(probs,bestSetting);
+
+  const hasData=tg>0||ng>0||totalFH>0||state.weak_suika>0||state.mid_bell>0;
+  document.getElementById('float-setting').textContent=hasData?'設定 '+bestSetting:'設定 ―';
+  document.getElementById('float-rtp').textContent    =hasData?'機械割 '+RTP[bestSetting]+'%':'';
+
+  renderSigns(ng,tg,totalFH,bestSetting,probs);
+  renderDerivedStats(ng,tg,totalFH);
+}
+
+function lh(actual,expected,spread){
+  if(actual<=0||expected<=0)return 1.0;
+  const logR=Math.log(actual/expected);
+  return Math.exp(-(logR*logR)/(2*spread*spread));
+}
+
+function renderBars(probs,bestSetting){
+  const colors={1:'#6a6a6a',2:'#8a8a8a',4:'#4a8aff',5:'#f0a020',6:'#ff3311'};
+  const container=document.getElementById('setting-bars');
+  container.innerHTML='';
+  SETTINGS.forEach(s=>{
+    const pct=(probs[s]*100).toFixed(1);
+    const isBest=s===bestSetting;
+    const row=document.createElement('div');
+    row.className='setting-row';
+    row.innerHTML=`
+      <div class="setting-label ${isBest?'highlight':''}">設定${s}</div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${colors[s]};${isBest?'box-shadow:0 0 8px '+colors[s]+'88':''}"></div></div>
+      <div class="bar-pct" style="color:${isBest?colors[s]:'var(--text-dim)'}">${pct}%</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function renderSigns(ng,tg,totalFH,bestSetting,probs){
+  const signs=[];
+  const tok=state.tokutei||0,naz=state.fh_nazo||0;
+  const amiba=state.v_amiba||0,ken1=state.v_ken1||0,yuria=state.v_yuria||0;
+
+  // ボイス
+  if(yuria>=1)        signs.push({text:`ユリア×${yuria}`,cls:'red'});
+  if(ken1>=1)         signs.push({text:`ケンシロウ×${ken1}`,cls:'red'});
+  if(amiba>=2)        signs.push({text:`アミバ×${amiba}`,cls:'red'});
+  else if(amiba===1)  signs.push({text:'アミバ',cls:'gold'});
+
+  // 初当たり内訳
+  if(naz>=1)                           signs.push({text:`謎当たり当選×${naz}`,cls:'red'});
+  if((state.fh_tenjo||0)>=1)           signs.push({text:`仮天井当選×${state.fh_tenjo}`,cls:'red'});
+  if(tok>=1)                           signs.push({text:`特定役当選×${tok}`,cls:'gold'});
+  if((state.fh_weak_cherry||0)>=1)     signs.push({text:`弱チェリー当選×${state.fh_weak_cherry}`,cls:'gold'});
+  if((state.fh_weak_suika||0)>=1)      signs.push({text:`弱スイカ当選×${state.fh_weak_suika}`,cls:'gold'});
+
+  // 小役・モード
+  if(tg>0&&state.mid_bell>0){
+    const gz=Math.round(tg/state.mid_bell);
+    if(gz<140)       signs.push({text:`共通ベル 1/${gz}↑`,cls:'gold'});
+    else if(gz>200)  signs.push({text:`共通ベル 1/${gz}↓`,cls:'blue'});
+  }
+  if(totalFH>=3){
+    const tkRate=(state.tenkou_start||0)/totalFH;
+    if(tkRate>=0.35) signs.push({text:`天国率 ${(tkRate*100).toFixed(0)}%↑`,cls:'gold'});
+  }
+
+  // 総合判定
+  if(probs[6]>0.40)               signs.push({text:'設定6可能性あり',cls:'red'});
+  if(probs[5]+probs[6]>0.50)      signs.push({text:'設定5以上可能性あり',cls:'red'});
+  if(probs[1]+probs[2]>0.55)      signs.push({text:'低設定の可能性',cls:'blue'});
+
+  if(!signs.length) signs.push({text:(ng+totalFH===0)?'入力待ち':'特記なし',cls:'gray'});
+  document.getElementById('signs-area').innerHTML=signs.map(s=>`<span class="sign-tag ${s.cls}">${s.text}</span>`).join('');
+  updateFloatSigns();
+}
+
+function renderDerivedStats(ng,tg,totalFH){
+  const hitPer   = totalFH>0&&ng>0 ? Math.round(ng/totalFH) : null;
+  const tkRate   = totalFH>0 ? ((state.tenkou_start/totalFH)*100).toFixed(1) : null;
+  const mbCnt    = state.mid_bell||0;
+  const mbRate   = tg>0&&mbCnt>0 ? Math.round(tg/mbCnt) : null;
+  const tokCnt   = state.tokutei||0;
+  const tokRate  = tg>0&&tokCnt>0 ? Math.round(tg/tokCnt) : null;
+  const wsCnt    = state.weak_suika||0;
+  const wsRate   = tg>0&&wsCnt>0 ? Math.round(tg/wsCnt) : null;
+  const ssCnt    = state.strong_suika||0;
+  const ssRate   = tg>0&&ssCnt>0 ? Math.round(tg/ssCnt) : null;
+  const scCnt    = state.strong_cherry||0;
+  const scRate   = tg>0&&scCnt>0 ? Math.round(tg/scCnt) : null;
+  const nazCnt   = state.fh_nazo||0;
+  const chansuCnt= state.fh_chansu||0;
+  const fhWSCnt  = state.fh_weak_suika||0;
+  const fhWCCnt  = state.fh_weak_cherry||0;
+  const tenjoCnt = state.fh_tenjo||0;
+
+  const hitCls = hitPer?(hitPer<280?'good':hitPer>370?'bad':'normal'):'normal';
+  const tkCls  = tkRate!==null?(parseFloat(tkRate)>=34?'good':parseFloat(tkRate)<=23?'bad':'normal'):'normal';
+  const mbCls  = mbRate?(mbRate<140?'good':mbRate>200?'bad':'normal'):'normal';
+
+  document.getElementById('derived-stats').innerHTML=`
+  <table class="stats-table">
+    <tr><th colspan="3">ゲーム数</th></tr>
+    <tr>
+      <td class="td-label">総ゲーム数</td>
+      <td class="td-val normal" colspan="2">${tg?tg.toLocaleString()+'G':'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">通常ゲーム数</td>
+      <td class="td-val normal" colspan="2">${ng?ng.toLocaleString()+'G':'―'}</td>
+    </tr>
+
+    <tr><th colspan="3">初当たり</th></tr>
+    <tr>
+      <td class="td-label">初当り合算（通常G）</td>
+      <td class="td-val ${hitCls}" colspan="2">${hitPer?'1/'+hitPer:'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">天国スタート率</td>
+      <td class="td-val ${tkCls}" colspan="2">${tkRate!==null?tkRate+'%':'―'}</td>
+    </tr>
+
+    <tr><th colspan="3">小役確率（総G）</th></tr>
+    <tr>
+      <td class="td-label">共通ベル<br><span style="font-size:9px;color:var(--text-dim);">（中右左で中段揃い・全状況合算）</span></td>
+      <td class="td-val ${mbCls}">${mbCnt}回</td>
+      <td class="td-sub">${mbRate?'1/'+mbRate:'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">弱スイカ</td>
+      <td class="td-val normal">${wsCnt}回</td>
+      <td class="td-sub">${wsRate?'1/'+wsRate:'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">強スイカ</td>
+      <td class="td-val normal">${ssCnt}回</td>
+      <td class="td-sub">${ssRate?'1/'+ssRate:'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">強チェリー</td>
+      <td class="td-val normal">${scCnt}回</td>
+      <td class="td-sub">${scRate?'1/'+scRate:'―'}</td>
+    </tr>
+    <tr>
+      <td class="td-label">特定役（リーチ目）</td>
+      <td class="td-val ${tokCnt>=1?'gold-v':'normal'}">${tokCnt}回</td>
+      <td class="td-sub">${tokRate?'1/'+tokRate:'―'}</td>
+    </tr>
+
+    <tr><th colspan="3">挙動（初当たり内訳）</th></tr>
+    <tr>
+      <td class="td-label">謎当たり</td>
+      <td class="td-val ${nazCnt>=2?'good':nazCnt>=1?'gold-v':'normal'}" colspan="2">${nazCnt}回</td>
+    </tr>
+    <tr>
+      <td class="td-label">チャンス目当選</td>
+      <td class="td-val ${chansuCnt>=1?'gold-v':'normal'}" colspan="2">${chansuCnt}回</td>
+    </tr>
+    <tr>
+      <td class="td-label">弱スイカ当選</td>
+      <td class="td-val ${fhWSCnt>=1?'gold-v':'normal'}" colspan="2">${fhWSCnt}回</td>
+    </tr>
+    <tr>
+      <td class="td-label">弱チェリー当選</td>
+      <td class="td-val ${fhWCCnt>=1?'gold-v':'normal'}" colspan="2">${fhWCCnt}回</td>
+    </tr>
+    <tr>
+      <td class="td-label">仮天井当選</td>
+      <td class="td-val ${tenjoCnt>=1?'good':'normal'}" colspan="2">${tenjoCnt}回</td>
+    </tr>
+  </table>
+  `;
+}
+
+function resetAll(){
+  state=defaultState();
+  saveState();
+  document.getElementById('total-g').value='';
+  document.getElementById('normal-g').value='';
+  document.getElementById('cnt-tenkou_start').textContent='0';
+  [...counterDefs,...firstHitDefs,...VOICE_DEFS].forEach(d=>{
+    const el=document.getElementById('cnt-'+d.id);
+    if(el)el.textContent='0';
+  });
+  compute();
+}
+
+// ===== 起動 =====
+buildYakuCounters();
+buildFhCounters();
+buildVoiceTable();
+loadState();
+applyStateToUI();
+compute();
+</script>
+</body>
+</html>
+
