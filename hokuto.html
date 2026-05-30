@@ -334,6 +334,7 @@ const firstHitDefs=[
   {id:'fh_nazo',        label:'謎当たり当選',     icon:'❓'},
   {id:'fh_tokutei',     label:'特定役当選',       icon:'⭐'},
   {id:'fh_tenjo',       label:'仮天井当選',       icon:'🏔'},
+  {id:'fh_tenjou',      label:'天井当選',         icon:'⛰'},
 ];
 
 // ===== STATE =====
@@ -344,7 +345,7 @@ function defaultState(){
     total_g:0,normal_g:0,tenkou_start:0,
     mid_bell:0,weak_suika:0,strong_suika:0,strong_cherry:0,tokutei:0,nazo:0,
     fh_chansu:0,fh_weak_suika:0,fh_strong_suika:0,
-    fh_weak_cherry:0,fh_mid_cherry:0,fh_nazo:0,fh_tokutei:0,fh_tenjo:0,
+    fh_weak_cherry:0,fh_mid_cherry:0,fh_nazo:0,fh_tokutei:0,fh_tenjo:0,fh_tenjou:0,
   };
   VOICE_DEFS.forEach(d=>s[d.id]=0);
   return s;
@@ -546,6 +547,11 @@ function compute(){
   if(tenjo>=1){scores[4]*=1.6;scores[5]*=1.9;scores[6]*=2.2;scores[1]*=0.30;scores[2]*=0.40;}
   if(tenjo>=2){scores[4]*=1.4;scores[5]*=1.6;scores[6]*=1.8;scores[1]*=0.40;scores[2]*=0.50;}
 
+  // 【天井当選】低設定の可能性
+  const tenjou=state.fh_tenjou||0;
+  if(tenjou>=1){scores[1]*=2.0;scores[2]*=1.8;scores[4]*=0.50;scores[5]*=0.30;scores[6]*=0.20;}
+  if(tenjou>=2){scores[1]*=1.8;scores[2]*=1.6;scores[4]*=0.45;scores[5]*=0.25;scores[6]*=0.15;}
+
   // 【チャンス目当選】高設定示唆
   const chansu=state.fh_chansu||0;
   if(chansu>=1){scores[4]*=1.3;scores[5]*=1.5;scores[6]*=1.7;scores[1]*=0.55;scores[2]*=0.65;}
@@ -637,9 +643,10 @@ function renderSigns(ng,tg,totalFH,bestSetting,probs){
   // 初当たり内訳
   if(naz>=1)                           signs.push({text:`謎当たり当選×${naz}`,cls:'red'});
   if((state.fh_tenjo||0)>=1)           signs.push({text:`仮天井当選×${state.fh_tenjo}`,cls:'red'});
+  if((state.fh_tenjou||0)>=1)          signs.push({text:`天井当選×${state.fh_tenjou}`,cls:'blue'});
   if(tok>=1)                           signs.push({text:`特定役当選×${tok}`,cls:'gold'});
   if((state.fh_weak_cherry||0)>=1)     signs.push({text:`弱チェリー当選×${state.fh_weak_cherry}`,cls:'gold'});
-  if((state.fh_weak_suika||0)>=1)      signs.push({text:`弱スイカ当選×${state.fh_weak_suika}`,cls:'gold'});
+  if((state.fh_weak_suika||0)>=2)      signs.push({text:`弱スイカ当選×${state.fh_weak_suika}`,cls:'gold'});
 
   // 小役・モード
   if(tg>0&&state.mid_bell>0){
@@ -653,8 +660,6 @@ function renderSigns(ng,tg,totalFH,bestSetting,probs){
   }
 
   // 総合判定
-  if(probs[6]>0.40)               signs.push({text:'設定6可能性あり',cls:'red'});
-  if(probs[5]+probs[6]>0.50)      signs.push({text:'設定5以上可能性あり',cls:'red'});
   if(probs[1]+probs[2]>0.55)      signs.push({text:'低設定の可能性',cls:'blue'});
 
   if(!signs.length) signs.push({text:(ng+totalFH===0)?'入力待ち':'特記なし',cls:'gray'});
@@ -681,6 +686,8 @@ function renderDerivedStats(ng,tg,totalFH){
   const fhWCCnt  = state.fh_weak_cherry||0;
   const fhSCCnt  = state.fh_mid_cherry||0;
   const tenjoCnt = state.fh_tenjo||0;
+  const tenjouCnt= state.fh_tenjou||0;
+  const fhTokCnt = state.fh_tokutei||0;
 
   const hitCls = hitPer?(hitPer<280?'good':hitPer>370?'bad':'normal'):'normal';
   const tkCls  = tkRate!==null?(parseFloat(tkRate)>=34?'good':parseFloat(tkRate)<=23?'bad':'normal'):'normal';
@@ -741,7 +748,9 @@ function renderDerivedStats(ng,tg,totalFH){
           {label:'弱スイカ',    val:fhWSCnt,   cls:fhWSCnt>=1?'gold-v':'normal'},
           {label:'弱チェリー',  val:fhWCCnt,   cls:fhWCCnt>=1?'gold-v':'normal'},
           {label:'強チェリー',  val:fhSCCnt,   cls:fhSCCnt>=1?'gold-v':'normal'},
+          {label:'特定役',      val:fhTokCnt,  cls:fhTokCnt>=1?'gold-v':'normal'},
           {label:'仮天井',      val:tenjoCnt,  cls:tenjoCnt>=1?'good':'normal'},
+          {label:'天井',        val:tenjouCnt, cls:tenjouCnt>=1?'bad':'normal'},
         ].map(i=>`
         <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:4px 8px;">
           <span style="font-size:11px;color:var(--text-dim);">${i.label}</span>
