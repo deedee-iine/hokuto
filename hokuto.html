@@ -302,7 +302,7 @@ const FIRST_HIT_RATE  ={1:1/383.4,2:1/370.5,4:1/297.8,5:1/258.7,6:1/235.1};
 const WEAK_SUIKA_RATE ={1:1/109.0,2:1/108.7,4:1/105.9,5:1/100.7,6:1/98.3};
 const STRONG_SUIKA_RATE={1:1/546.1,2:1/537.2,4:1/489.1,5:1/448.9,6:1/425.6};
 const MID_CHERRY_RATE ={1:1/1638.4,2:1/1307.2,4:1/1092.3,5:1/936.2,6:1/819.2};
-const MID_BELL_RATE   ={1:1/220,2:1/200,4:1/170,5:1/145,6:1/120};
+const MID_BELL_RATE   ={1:1/165,2:1/150,4:1/120,5:1/100,6:1/100};
 const TENKOU_RATE     ={1:0.2582,2:0.2582,4:0.3024,5:0.3380,6:0.3594};
 // 強チェリー合算（画像データ: 設定1=1/546.1, 設定6=1/425.6）
 const STRONG_CHERRY_RATE={1:1/546.1,2:1/537.2,4:1/489.1,5:1/448.9,6:1/425.6};
@@ -644,8 +644,8 @@ function renderSigns(ng,tg,totalFH,bestSetting,probs){
   // 小役・モード
   if(tg>0&&state.mid_bell>0){
     const gz=Math.round(tg/state.mid_bell);
-    if(gz<140)       signs.push({text:`共通ベル 1/${gz}↑`,cls:'gold'});
-    else if(gz>200)  signs.push({text:`共通ベル 1/${gz}↓`,cls:'blue'});
+    if(gz<110)       signs.push({text:`共通ベル 1/${gz}↑`,cls:'gold'});
+    else if(gz>155)  signs.push({text:`共通ベル 1/${gz}↓`,cls:'blue'});
   }
   if(totalFH>=3){
     const tkRate=(state.tenkou_start||0)/totalFH;
@@ -683,7 +683,7 @@ function renderDerivedStats(ng,tg,totalFH){
 
   const hitCls = hitPer?(hitPer<280?'good':hitPer>370?'bad':'normal'):'normal';
   const tkCls  = tkRate!==null?(parseFloat(tkRate)>=34?'good':parseFloat(tkRate)<=23?'bad':'normal'):'normal';
-  const mbCls  = mbRate?(mbRate<140?'good':mbRate>200?'bad':'normal'):'normal';
+  const mbCls  = mbRate?(mbRate<110?'good':mbRate>155?'bad':'normal'):'normal';
 
   document.getElementById('derived-stats').innerHTML=`
   <table class="stats-table">
