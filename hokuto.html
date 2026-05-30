@@ -729,9 +729,9 @@ function renderDerivedStats(ng,tg,totalFH){
       <td class="td-sub">${wsRate?'1/'+wsRate:'―'} / ${ssRate?'1/'+ssRate:'―'}</td>
     </tr>
     <tr>
-      <td class="td-label">強チェリー</td>
-      <td class="td-val normal">${scCnt}回</td>
-      <td class="td-sub">${scRate?'1/'+scRate:'―'}</td>
+      <td class="td-label">弱チェリー / 強チェリー</td>
+      <td class="td-val normal">${(state.fh_weak_cherry||0)}/${scCnt}回</td>
+      <td class="td-sub">― / ${scRate?'1/'+scRate:'―'}</td>
     </tr>
     <tr>
       <td class="td-label">特定役（リーチ目）</td>
@@ -744,18 +744,24 @@ function renderDerivedStats(ng,tg,totalFH){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
         ${[
           {label:'謎当たり',    val:nazCnt,    cls:nazCnt>=2?'good':nazCnt>=1?'gold-v':'normal'},
-          {label:'チャンス目',  val:chansuCnt, cls:chansuCnt>=1?'gold-v':'normal'},
-          {label:'弱スイカ',    val:fhWSCnt,   cls:fhWSCnt>=1?'gold-v':'normal'},
-          {label:'弱チェリー',  val:fhWCCnt,   cls:fhWCCnt>=1?'gold-v':'normal'},
-          {label:'強チェリー',  val:fhSCCnt,   cls:fhSCCnt>=1?'gold-v':'normal'},
           {label:'特定役',      val:fhTokCnt,  cls:fhTokCnt>=1?'gold-v':'normal'},
           {label:'仮天井',      val:tenjoCnt,  cls:tenjoCnt>=1?'good':'normal'},
           {label:'天井',        val:tenjouCnt, cls:tenjouCnt>=1?'bad':'normal'},
+          {label:'チャンス目',  val:chansuCnt, cls:chansuCnt>=1?'gold-v':'normal'},
         ].map(i=>`
         <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:4px 8px;">
           <span style="font-size:11px;color:var(--text-dim);">${i.label}</span>
-          <span style="font-size:13px;font-weight:900;color:${i.cls==='good'?'var(--green)':i.cls==='gold-v'?'var(--gold-light)':'var(--text)'};">${i.val}回</span>
+          <span style="font-size:13px;font-weight:900;color:${i.cls==='good'?'var(--green)':i.cls==='gold-v'?'var(--gold-light)':i.cls==='bad'?'var(--red-bright)':'var(--text)'};">${i.val}回</span>
         </div>`).join('')}
+        <div style="grid-column:span 1;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:4px 8px;grid-column:span 2;">
+          <span style="font-size:11px;color:var(--text-dim);">弱スイカ / 強スイカ</span>
+          <span style="font-size:13px;font-weight:900;color:${fhWSCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWSCnt} / ${(state.fh_strong_suika||0)}回</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:4px 8px;grid-column:span 2;">
+          <span style="font-size:11px;color:var(--text-dim);">弱チェリー / 強チェリー</span>
+          <span style="font-size:13px;font-weight:900;color:${fhWCCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWCCnt} / ${fhSCCnt}回</span>
+        </div>
       </div>
     </td></tr>
 
