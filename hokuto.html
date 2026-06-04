@@ -85,7 +85,7 @@ body::before{
 .setting-row:last-child{margin-bottom:0;}
 .setting-label{font-size:12px;font-weight:700;color:var(--text-dim);width:40px;flex-shrink:0;}
 .setting-label.highlight{color:var(--gold-light);}
-.bar-wrap{flex:1;background:rgba(0,0,0,.4);border-radius:4px;height:14px;overflow:hidden;border:1px solid var(--border);}
+.bar-wrap{flex:1;background:rgba(0,0,0,.4);border-radius:4px;height:16px;overflow:hidden;border:1px solid var(--border);}
 .bar-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);}
 .bar-pct{font-size:11px;font-weight:700;width:40px;text-align:right;flex-shrink:0;}
 .signs-header{padding:5px 14px;background:rgba(0,0,0,.2);display:flex;align-items:center;gap:6px;border-top:1px solid var(--border);}
@@ -312,6 +312,11 @@ footer{text-align:center;padding:10px;font-size:9px;color:var(--text-dim);letter
     </div>
   </div>
 
+  <div class="section-title">トロフィー</div>
+  <div class="card">
+    <div class="card-body" id="trophy-body"></div>
+  </div>
+
   <div class="section-title">ボイス</div>
   <div class="card">
     <div class="card-body" style="padding:6px 10px;">
@@ -388,7 +393,7 @@ const VOICE_DEFS=[
 ];
 
 const counterDefs=[
-  {id:'mid_bell',    label:'共通ベル',          icon:'🔔',gozanId:'gz-mid-bell'},
+  {id:'mid_bell',    label:'共通ベル<br><span style="font-size:9px;color:var(--text-dim);font-weight:400;">（中右左で中段揃い・全状況合算）</span>', icon:'🔔',gozanId:'gz-mid-bell'},
   {id:'weak_suika',  label:'弱スイカ',           icon:'🍉',gozanId:'gz-weak-suika'},
   {id:'strong_suika',label:'強スイカ',           icon:'🍉',gozanId:'gz-strong-suika'},
   {id:'strong_cherry',label:'強チェリー',        icon:'🍒',gozanId:'gz-strong-cherry'},
@@ -405,6 +410,7 @@ const firstHitDefs=[
   {id:'fh_tokutei',     label:'特定役当選',       icon:'⭐'},
   {id:'fh_tenjo',       label:'仮天井当選',       icon:'🏔'},
   {id:'fh_tenjou',      label:'天井当選',         icon:'⛰'},
+  {id:'fh_sokuzenko',    label:'即前兆',           icon:'⚡'},
 ];
 
 // ===== STATE =====
@@ -415,9 +421,10 @@ function defaultState(){
     total_g:0,normal_g:0,tenkou_start:0,
     mid_bell:0,weak_suika:0,strong_suika:0,strong_cherry:0,tokutei:0,nazo:0,
     fh_chansu:0,fh_weak_suika:0,fh_strong_suika:0,
-    fh_weak_cherry:0,fh_mid_cherry:0,fh_nazo:0,fh_tokutei:0,fh_tenjo:0,fh_tenjou:0,
+    fh_weak_cherry:0,fh_mid_cherry:0,fh_nazo:0,fh_tokutei:0,fh_tenjo:0,fh_tenjou:0,fh_sokuzenko:0,
   };
   VOICE_DEFS.forEach(d=>s[d.id]=0);
+  s.trophy4=0; s.trophy5=0; s.trophy6=0;
   return s;
 }
 
@@ -434,6 +441,33 @@ function loadState(){
 }
 
 // ===== UI BUILDER =====
+function buildTrophyCounters(){
+  const body=document.getElementById('trophy-body');
+  const trophyDefs=[
+    {id:'trophy4',label:'🏆 設定4以上確定'},
+    {id:'trophy5',label:'🦒 設定5以上確定'},
+    {id:'trophy6',label:'🌈 設定6確定'},
+  ];
+  body.innerHTML='';
+  trophyDefs.forEach(d=>{
+    const block=document.createElement('div');
+    block.className='counter-block';
+    block.innerHTML=`
+      <div class="counter-row">
+        <label style="font-size:13px;font-weight:700;color:var(--gold-light);">${d.label}</label>
+        <button class="cnt-btn" id="btn-dec-${d.id}">−</button>
+        <div class="cnt-val" id="cnt-${d.id}" contenteditable="true" inputmode="numeric"
+          onfocus="selectAll(this)"
+          onblur="setFromEdit('${d.id}',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+        <button class="cnt-btn" id="btn-inc-${d.id}">＋</button>
+      </div>
+    `;
+    body.appendChild(block);
+    bindTapAndLongPress(document.getElementById('btn-inc-'+d.id), ()=>inc(d.id), ()=>inc(d.id));
+    bindTapAndLongPress(document.getElementById('btn-dec-'+d.id), ()=>dec(d.id), ()=>dec(d.id));
+  });
+}
+
 function buildYakuCounters(){
   const body=document.getElementById('counters-body');
   body.innerHTML='';
@@ -451,6 +485,9 @@ function buildYakuCounters(){
       </div>
       <div class="gozan-mini" id="${d.gozanId}"></div>
     `;
+    // labelにHTMLを含む場合はinnerHTMLで設定
+    const labelEl = block.querySelector('label');
+    if(labelEl) labelEl.innerHTML = d.icon + ' ' + d.label;
     body.appendChild(block);
     bindLongPress(document.getElementById('btn-inc-'+d.id), ()=>inc(d.id));
     bindLongPress(document.getElementById('btn-dec-'+d.id), ()=>dec(d.id));
@@ -511,7 +548,7 @@ function applyStateToUI(){
   document.getElementById('normal-g').value = state.normal_g||'';
   // カウンター
   document.getElementById('cnt-tenkou_start').textContent = state.tenkou_start||0;
-  [...counterDefs,...firstHitDefs,...VOICE_DEFS].forEach(d=>{
+  [...counterDefs,...firstHitDefs,...VOICE_DEFS,{id:'trophy4'},{id:'trophy5'},{id:'trophy6'}].forEach(d=>{
     const el=document.getElementById('cnt-'+d.id);
     if(el) el.textContent = state[d.id]||0;
   });
@@ -710,6 +747,12 @@ function compute(){
   const yuria=state.v_yuria||0;
   if(yuria>=1){scores[5]*=5.0;scores[6]*=6.0;scores[1]*=0.02;scores[2]*=0.05;scores[4]*=0.20;}
 
+  // 【トロフィー】確定要素
+  const trophy4=state.trophy4||0, trophy5=state.trophy5||0, trophy6=state.trophy6||0;
+  if(trophy4>=1){scores[1]=0.001;scores[2]=0.001;scores[4]*=3.0;scores[5]*=2.5;scores[6]*=2.5;}
+  if(trophy5>=1){scores[1]=0.001;scores[2]=0.001;scores[4]=0.001;scores[5]*=4.0;scores[6]*=3.5;}
+  if(trophy6>=1){scores[1]=0.001;scores[2]=0.001;scores[4]=0.001;scores[5]=0.001;scores[6]*=10.0;}
+
   const total=SETTINGS.reduce((a,s)=>a+scores[s],0);
   const probs={};
   SETTINGS.forEach(s=>probs[s]=total>0?scores[s]/total:0.2);
@@ -737,8 +780,8 @@ function renderBars(probs,bestSetting){
     1:'#6a6a6a',
     2:'#8a8a8a',
     4:'linear-gradient(90deg,#c9a227,#f0d060,#c9a227)',
-    5:'repeating-linear-gradient(90deg,#c8a000 0px,#c8a000 8px,#1a1a00 8px,#1a1a00 14px,#c8a000 14px)',
-    6:'linear-gradient(90deg,#ff0000,#ff8800,#ffff00,#00cc00,#0088ff,#8800ff,#ff0088)'
+    5:'radial-gradient(ellipse 8px 6px at 8px 7px,#1a1200 70%,transparent 70%),radial-gradient(ellipse 7px 5px at 20px 2px,#1a1200 70%,transparent 70%),radial-gradient(ellipse 6px 5px at 24px 12px,#1a1200 70%,transparent 70%),radial-gradient(ellipse 8px 6px at 36px 6px,#1a1200 70%,transparent 70%) #c8a000',
+    6:'linear-gradient(90deg,#ff0000 0%,#ff6600 17%,#ffee00 33%,#00cc00 50%,#0088ff 67%,#8800ff 83%,#ff0099 100%)'
   };
   const container=document.getElementById('setting-bars');
   container.innerHTML='';
@@ -748,9 +791,8 @@ function renderBars(probs,bestSetting){
     const row=document.createElement('div');
     row.className='setting-row';
     const isGradient=typeof colors[s]==='string'&&colors[s].includes('gradient');
-    const barStyle=isGradient
-      ?`width:${pct}%;background:${colors[s]};background-size:200px 100%;`
-      :`width:${pct}%;background:${colors[s]};`;
+    const bgSize=s===6?'300px 100%':s===5?'44px 100%':s===4?'200px 100%':'';
+    const barStyle=`width:${pct}%;background:${colors[s]};${bgSize?'background-size:'+bgSize+';':''}`;
     const labelColor=s===6?'#ff88cc':s===5?'#e8c840':s===4?'var(--gold-light)':'var(--text-dim)';
     row.innerHTML=`
       <div class="setting-label ${isBest?'highlight':''}" style="${isBest?'color:'+labelColor:''}">設定${s}</div>
@@ -794,6 +836,9 @@ function renderSigns(ng,tg,totalFH,bestSetting,probs){
   // 総合判定
   if(probs[1]+probs[2]>0.55)      signs.push({text:'低設定の可能性',cls:'blue'});
 
+  if((state.trophy6||0)>=1) signs.push({text:'🌈 設定6確定',cls:'red'});
+  if((state.trophy5||0)>=1) signs.push({text:'🦒 設定5以上確定',cls:'red'});
+  if((state.trophy4||0)>=1) signs.push({text:'🏆 設定4以上確定',cls:'gold'});
   if(!signs.length) signs.push({text:(ng+totalFH===0)?'入力待ち':'特記なし',cls:'gray'});
   document.getElementById('signs-area').innerHTML=signs.map(s=>`<span class="sign-tag ${s.cls}">${s.text}</span>`).join('');
   updateFloatSigns();
@@ -850,62 +895,75 @@ function renderDerivedStats(ng,tg,totalFH){
     </td></tr>
 
     <tr><th colspan="3">小役確率（総G）</th></tr>
-    <tr>
-      <td class="td-label">共通ベル<br><span style="font-size:9px;color:var(--text-dim);">（中右左で中段揃い・全状況合算）</span></td>
-      <td class="td-val ${mbCls}">${mbCnt}回</td>
-      <td class="td-sub">${mbRate?'1/'+mbRate:'―'}</td>
-    </tr>
-    <tr>
-      <td class="td-label">弱スイカ / 強スイカ</td>
-      <td class="td-val normal">${wsCnt}/${ssCnt}回</td>
-      <td class="td-sub">${wsRate?'1/'+wsRate:'―'} / ${ssRate?'1/'+ssRate:'―'}</td>
-    </tr>
-    <tr>
-      <td class="td-label">強チェリー</td>
-      <td class="td-val normal">${scCnt}回</td>
-      <td class="td-sub">${scRate?'1/'+scRate:'―'}</td>
-    </tr>
-    <tr>
-      <td class="td-label">特定役（リーチ目）</td>
-      <td class="td-val ${tokCnt>=1?'gold-v':'normal'}">${tokCnt}回</td>
-      <td class="td-sub">${tokRate?'1/'+tokRate:'―'}</td>
-    </tr>
+    <tr><td colspan="3" style="padding:4px 6px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">共通🔔</span>
+          <span style="font-size:11px;font-weight:900;color:${mbCls==='good'?'var(--green)':mbCls==='bad'?'var(--red-bright)':'var(--text)'};">${mbCnt}回 ${mbRate?'1/'+mbRate:''}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">特定役</span>
+          <span style="font-size:11px;font-weight:900;color:${tokCnt>=1?'var(--gold-light)':'var(--text)'};">${tokCnt}回 ${tokRate?'1/'+tokRate:''}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">弱🍉/強🍉</span>
+          <span style="font-size:11px;font-weight:900;color:var(--text);">${wsCnt}/${ssCnt}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">強🍒</span>
+          <span style="font-size:11px;font-weight:900;color:var(--text);">${scCnt}回 ${scRate?'1/'+scRate:''}</span>
+        </div>
+      </div>
+    </td></tr>
 
     <tr><th colspan="3">当選契機</th></tr>
     <tr><td colspan="3" style="padding:4px 6px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
         ${[
-          {label:'謎当たり',    val:nazCnt,    cls:nazCnt>=2?'good':nazCnt>=1?'gold-v':'normal'},
-          {label:'特定役',      val:fhTokCnt,  cls:fhTokCnt>=1?'gold-v':'normal'},
-          {label:'仮天井',      val:tenjoCnt,  cls:tenjoCnt>=1?'good':'normal'},
-          {label:'天井',        val:tenjouCnt, cls:tenjouCnt>=1?'bad':'normal'},
+          {label:'謎当たり',  val:nazCnt,                cls:nazCnt>=2?'good':nazCnt>=1?'gold-v':'normal'},
+          {label:'即前兆',    val:state.fh_sokuzenko||0, cls:(state.fh_sokuzenko||0)>=1?'gold-v':'normal'},
+          {label:'仮天井',    val:tenjoCnt,              cls:tenjoCnt>=1?'good':'normal'},
+          {label:'天井',      val:tenjouCnt,             cls:tenjouCnt>=1?'bad':'normal'},
+          {label:'特定役',    val:fhTokCnt,              cls:fhTokCnt>=1?'gold-v':'normal'},
+          {label:'チャンス目',val:chansuCnt,             cls:chansuCnt>=1?'gold-v':'normal'},
         ].map(i=>`
         <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
           <span style="font-size:10px;color:var(--text-dim);">${i.label}</span>
           <span style="font-size:12px;font-weight:900;color:${i.cls==='good'?'var(--green)':i.cls==='gold-v'?'var(--gold-light)':i.cls==='bad'?'var(--red-bright)':'var(--text)'};">${i.val}回</span>
         </div>`).join('')}
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;grid-column:span 2;">
-          <span style="font-size:11px;color:var(--text-dim);">チャンス目</span>
-          <span style="font-size:12px;font-weight:900;color:${chansuCnt>=1?'var(--gold-light)':'var(--text)'};">${chansuCnt}回</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">弱🍉/強🍉</span>
+          <span style="font-size:12px;font-weight:900;color:${fhWSCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWSCnt}/${(state.fh_strong_suika||0)}回</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;grid-column:span 2;">
-          <span style="font-size:11px;color:var(--text-dim);">弱スイカ / 強スイカ</span>
-          <span style="font-size:12px;font-weight:900;color:${fhWSCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWSCnt} / ${(state.fh_strong_suika||0)}回</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;grid-column:span 2;">
-          <span style="font-size:11px;color:var(--text-dim);">弱チェリー / 強チェリー</span>
-          <span style="font-size:12px;font-weight:900;color:${fhWCCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWCCnt} / ${fhSCCnt}回</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+          <span style="font-size:10px;color:var(--text-dim);">弱🍒/強🍒</span>
+          <span style="font-size:12px;font-weight:900;color:${fhWCCnt>=1?'var(--gold-light)':'var(--text)'};">${fhWCCnt}/${fhSCCnt}回</span>
         </div>
       </div>
     </td></tr>
 
     <tr><th colspan="3">ボイス</th></tr>
     <tr><td colspan="3" style="padding:4px 6px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;">
         ${VOICE_DEFS.map(d=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 6px;">
           <span style="font-size:10px;color:var(--text-dim);">${d.chara}</span>
-          <span style="font-size:12px;font-weight:900;color:${(state[d.id]||0)>=1?'var(--gold-light)':'var(--text)'};">${state[d.id]||0}回</span>
+          <span style="font-size:12px;font-weight:900;color:${(state[d.id]||0)>=1?'var(--gold-light)':'var(--text)'};">${state[d.id]||0}</span>
+        </div>`).join('')}
+      </div>
+    </td></tr>
+
+    <tr><th colspan="3">トロフィー</th></tr>
+    <tr><td colspan="3" style="padding:4px 6px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;">
+        ${[
+          {label:'🏆 4以上', val:state.trophy4||0, cls:(state.trophy4||0)>=1?'var(--gold-light)':'var(--text)'},
+          {label:'🦒 5以上', val:state.trophy5||0, cls:(state.trophy5||0)>=1?'var(--gold-light)':'var(--text)'},
+          {label:'🌈 6確定', val:state.trophy6||0, cls:(state.trophy6||0)>=1?'var(--red-bright)':'var(--text)'},
+        ].map(i=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 6px;">
+          <span style="font-size:10px;color:var(--text-dim);">${i.label}</span>
+          <span style="font-size:12px;font-weight:900;color:${i.cls};">${i.val}</span>
         </div>`).join('')}
       </div>
     </td></tr>
@@ -919,7 +977,7 @@ function resetAll(){
   document.getElementById('total-g').value='';
   document.getElementById('normal-g').value='';
   document.getElementById('cnt-tenkou_start').textContent='0';
-  [...counterDefs,...firstHitDefs,...VOICE_DEFS].forEach(d=>{
+  [...counterDefs,...firstHitDefs,...VOICE_DEFS,{id:'trophy4'},{id:'trophy5'},{id:'trophy6'}].forEach(d=>{
     const el=document.getElementById('cnt-'+d.id);
     if(el)el.textContent='0';
   });
@@ -927,6 +985,7 @@ function resetAll(){
 }
 
 // ===== 起動 =====
+buildTrophyCounters();
 buildYakuCounters();
 buildFhCounters();
 buildVoiceTable();
