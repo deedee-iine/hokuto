@@ -41,12 +41,9 @@ body::before{
 /* ===== HEADER ===== */
 .app-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:9px 14px 8px;
-  background:rgba(12,8,4,.65);
-  backdrop-filter:blur(8px);
+  padding:8px 14px;padding-top:calc(var(--safe-top) + 8px);
+  background:transparent;
   border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:100;
-  padding-top:calc(var(--safe-top) + 10px);
 }
 .app-header-left{display:flex;flex-direction:column;gap:2px;}
 .app-title{font-size:17px;font-weight:900;color:var(--gold-light);letter-spacing:.5px;line-height:1;}
@@ -62,10 +59,11 @@ body::before{
 
 /* ===== FLOAT PANEL ===== */
 #float-panel{
-  position:fixed;top:calc(var(--safe-top) + 56px);left:0;right:0;z-index:99;
-  background:rgba(12,8,4,.88);
+  position:fixed;top:0;left:0;right:0;z-index:99;
+  background:rgba(12,8,4,.92);
   backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
+  border-bottom:2px solid var(--gold);
+  transform:translateY(0);
 }
 #float-toggle{
   display:flex;align-items:center;justify-content:space-between;
@@ -220,20 +218,40 @@ body::before{
 .td-val.normal{color:var(--text);}
 
 footer{text-align:center;padding:10px;font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+
+/* ===== TABS ===== */
+.tab-bar{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:4px;margin-bottom:10px;
+  background:rgba(0,0,0,.3);
+  border-radius:10px;padding:3px;
+}
+.tab-btn{
+  padding:8px 4px;font-size:11px;font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  background:transparent;border:none;
+  color:var(--text-dim);border-radius:8px;
+  cursor:pointer;transition:all .2s;
+}
+.tab-btn.active{
+  background:rgba(201,162,39,.25);
+  color:var(--gold-light);
+  border:1px solid rgba(201,162,39,.4);
+}
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div class="app-header-left">
-    <div class="app-title">スマスロ北斗の拳</div>
-    <div class="app-sub">設定推測ツール</div>
-  </div>
-  <button class="reset-btn" onclick="resetAll()">リセット</button>
-</div>
-
-<!-- 固定表示パネル -->
+<!-- 固定表示パネル（ヘッダー含む） -->
 <div id="float-panel">
+  <!-- アプリヘッダー -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-title">スマスロ北斗の拳</div>
+      <div class="app-sub">設定推測ツール</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">リセット</button>
+  </div>
   <div id="float-toggle" onclick="toggleFloat()">
     <div id="float-summary">
       <span id="float-setting">設定 ―</span>
@@ -254,85 +272,108 @@ footer{text-align:center;padding:10px;font-size:9px;color:var(--text-dim);letter
 
 <div class="container">
 
-  <div class="section-title">ゲーム数</div>
-  <div class="card">
-    <div class="card-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div class="field">
-          <label>総ゲーム数</label>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button class="cnt-btn" id="btn-g-total_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
-            <input type="number" id="total-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
-            <button class="cnt-btn" id="btn-g-total_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+  <!-- タブバー -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab(0)">小役・G数</button>
+    <button class="tab-btn" onclick="switchTab(1)">当選・天国</button>
+    <button class="tab-btn" onclick="switchTab(2)">特殊・ボイス</button>
+    <button class="tab-btn" onclick="switchTab(3)">実績</button>
+  </div>
+
+  <!-- タブ0: ゲーム数 + 小役カウント -->
+  <div class="tab-panel" id="tab-0">
+    <div class="section-title">ゲーム数</div>
+    <div class="card">
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field">
+            <label>総ゲーム数</label>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <button class="cnt-btn" id="btn-g-total_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
+              <input type="number" id="total-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
+              <button class="cnt-btn" id="btn-g-total_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>通常ゲーム数</label>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <button class="cnt-btn" id="btn-g-normal_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
+              <input type="number" id="normal-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
+              <button class="cnt-btn" id="btn-g-normal_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <label>通常ゲーム数</label>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button class="cnt-btn" id="btn-g-normal_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
-            <input type="number" id="normal-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
-            <button class="cnt-btn" id="btn-g-normal_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+      </div>
+    </div>
+    <div class="section-title">小役カウント</div>
+    <div class="card">
+      <div class="card-body" id="counters-body"></div>
+    </div>
+  </div>
+
+  <!-- タブ1: 当選契機 + 天国スタート -->
+  <div class="tab-panel" id="tab-1" style="display:none;">
+    <div class="section-title">初当たり内訳</div>
+    <div class="card">
+      <div class="card-body">
+        <div id="first-hit-counters"></div>
+        <div class="fh-total-row">
+          <span class="ft-label">合計初当たり回数</span>
+          <span class="ft-gozan" id="fh-gozan">通常G入力で合算表示</span>
+          <span class="ft-val" id="fh-total">0回</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">天国スタート</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="counter-block">
+          <div class="counter-row">
+            <label>🌟 AT後天国スタート回数</label>
+            <button class="cnt-btn" id="btn-dec-tenkou_start">−</button>
+            <div class="cnt-val" id="cnt-tenkou_start" contenteditable="true" inputmode="numeric"
+              onfocus="selectAll(this)"
+              onblur="setFromEdit('tenkou_start',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
+            <button class="cnt-btn" id="btn-inc-tenkou_start">＋</button>
           </div>
+          <div class="gozan-mini" id="gz-tenkou"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="section-title">小役カウント</div>
-  <div class="card">
-    <div class="card-body" id="counters-body"></div>
-  </div>
-
-  <div class="section-title">初当たり内訳</div>
-  <div class="card">
-    <div class="card-body">
-      <div id="first-hit-counters"></div>
-      <div class="fh-total-row">
-        <span class="ft-label">合計初当たり回数</span>
-        <span class="ft-gozan" id="fh-gozan">通常G入力で合算表示</span>
-        <span class="ft-val" id="fh-total">0回</span>
+  <!-- タブ2: ボイス + トロフィー -->
+  <div class="tab-panel" id="tab-2" style="display:none;">
+    <div class="section-title">ボイス</div>
+    <div class="card">
+      <div class="card-body" style="padding:6px 10px;">
+        <table class="voice-table" id="voice-table"></table>
       </div>
     </div>
-  </div>
-
-  <div class="section-title">天国スタート</div>
-  <div class="card">
-    <div class="card-body">
-      <div class="counter-block">
-        <div class="counter-row">
-          <label>🌟 AT後天国スタート回数</label>
-          <button class="cnt-btn" id="btn-dec-tenkou_start">−</button>
-          <div class="cnt-val" id="cnt-tenkou_start" contenteditable="true" inputmode="numeric"
-            onfocus="selectAll(this)"
-            onblur="setFromEdit('tenkou_start',this)" onkeydown="if(event.key==='Enter')this.blur()">0</div>
-          <button class="cnt-btn" id="btn-inc-tenkou_start">＋</button>
-        </div>
-        <div class="gozan-mini" id="gz-tenkou"></div>
-      </div>
+    <div class="section-title">トロフィー</div>
+    <div class="card">
+      <div class="card-body" id="trophy-body"></div>
     </div>
   </div>
 
-  <div class="section-title">トロフィー</div>
-  <div class="card">
-    <div class="card-body" id="trophy-body"></div>
-  </div>
-
-  <div class="section-title">ボイス</div>
-  <div class="card">
-    <div class="card-body" style="padding:6px 10px;">
-      <table class="voice-table" id="voice-table"></table>
+  <!-- タブ3: 実績データ -->
+  <div class="tab-panel" id="tab-3" style="display:none;">
+    <div class="section-title">実績データ</div>
+    <div class="card">
+      <div id="derived-stats"></div>
     </div>
-  </div>
-
-  <div class="section-title">解析結果</div>
-  <div class="card">
-    <div id="derived-stats"></div>
   </div>
 
   <footer>※ 本ツールは参考ツールです。設定確定要素ではありません。</footer>
 </div>
 
 <script>
+
+// ===== タブ切り替え =====
+function switchTab(idx){
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.style.display=i===idx?'block':'none');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+}
 
 // ===== フローティングパネル =====
 let floatOpen = false;
@@ -344,8 +385,10 @@ function toggleFloat(){
   adjustSpacer();
 }
 function adjustSpacer(){
-  const h = document.getElementById('float-panel').offsetHeight;
-  document.getElementById('float-spacer').style.height = h + 'px';
+  setTimeout(()=>{
+    const fp = document.getElementById('float-panel');
+    document.getElementById('float-spacer').style.height = fp.offsetHeight + 'px';
+  }, 50);
 }
 window.addEventListener('resize', adjustSpacer);
 window.addEventListener('load', ()=>{ setTimeout(adjustSpacer, 100); });
