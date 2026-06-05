@@ -55,7 +55,12 @@ body{
 /* ── スクロールエリア ── */
 #scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;transition:padding-top 0.15s ease}
 
-/* ── フォームエリア ── */
+/* ── タブ ── */
+#tab-bar{display:flex;margin:6px 10px 0;gap:4px}
+.tab-btn{flex:1;padding:7px 4px;font-size:11px;font-weight:700;font-family:'Noto Sans JP',sans-serif;color:#666;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:8px 8px 0 0;cursor:pointer;text-align:center;border-bottom:none;transition:all .15s}
+.tab-btn.active{color:var(--a);background:rgba(14,10,5,.9);border-color:rgba(232,160,32,.3);border-bottom:2px solid var(--a)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 #fa{padding:2px 10px 48px}
 
 /* ── セクション ── */
@@ -181,10 +186,16 @@ body::before{
   <div style="flex:1;text-align:center;padding:6px 3px;border-right:1px solid rgba(255,255,255,.05)"><div style="font-size:8px;color:#ee3344;font-weight:700">設定5</div><div style="font-family:'Oswald',sans-serif;font-size:12px;color:#ee3344;font-weight:700">1/146</div></div>
   <div style="flex:1;text-align:center;padding:6px 3px"><div style="font-size:8px;font-weight:700;background:linear-gradient(90deg,#ff4444,#ff9900,#ffdd00,#44cc44,#4488ff,#cc44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">設定6</div><div style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;background:linear-gradient(90deg,#ff4444,#ff9900,#ffdd00,#44cc44,#4488ff,#cc44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1/136</div></div>
 </div>
+<!-- タブバー -->
+<div id="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(0)">🎰 ボーナス</button>
+  <button class="tab-btn" onclick="switchTab(1)">💡 ランプ</button>
+  <button class="tab-btn" onclick="switchTab(2)">📈 実績</button>
+</div>
+
 <!-- フォーム -->
 <div id="fa">
-
-  <!-- ボーナス確率 -->
+<div class="tab-panel active" id="tab0">
   <div class="sec">
     <div class="sec-t">🎰 ボーナス確率</div>
 
@@ -264,7 +275,9 @@ body::before{
     <div id="big-games-auto" style="font-size:9px;color:#555;padding:2px 14px 10px"></div>
     <span style="display:none" id="yv-suika"></span><span style="display:none" id="yr-suika"></span><span style="display:none" id="yc-suika"></span>
   </div>
+</div><!-- /tab0 -->
 
+<div class="tab-panel" id="tab1">
   <!-- REGサイドランプ -->
   <div class="sec" style="padding:14px">
     <div class="sec-t" style="padding:0;margin-bottom:12px">👻✨ REGサイドランプ</div>
@@ -336,7 +349,9 @@ body::before{
     <input type="hidden" id="rtBig" value="0">
     <input type="hidden" id="rtReg" value="0">
   </div>
+</div><!-- /tab1 -->
 
+<div class="tab-panel" id="tab2">
   <!-- 実績データ -->
   <div class="sec" style="padding:14px">
     <div class="sec-t" style="padding:0;margin-bottom:12px">📈 実績データ</div>
@@ -391,6 +406,8 @@ body::before{
       <div class="rd-cell"><div class="rd-lbl">合計</div><div id="rd-rt-tot" class="rd-val">—</div></div>
     </div>
   </div>
+
+</div><!-- /tab2 -->
 
 </div><!-- /#fa -->
 <div style="text-align:center;font-size:9px;color:#2a2a2a;padding:16px 20px">※ 解析データ・実戦値をもとにした推測ツールです。設定を保証するものではありません。</div>
@@ -498,6 +515,13 @@ function stepRetro(delta){
 
 // 長押し対応stepInput
 let _holdTimer=null, _holdInterval=null;
+let _currentTab=0;
+function switchTab(n){
+  _currentTab=n;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+  requestAnimationFrame(()=>requestAnimationFrame(layoutRP));
+}
 function stepInput(id,delta){
   const el=document.getElementById(id);
   if(!el) return;
@@ -516,12 +540,12 @@ function endHold(){
   clearInterval(_holdInterval);
   _holdTimer=null;_holdInterval=null;
 }
+// 指がどこで離れても必ず止まる
+document.addEventListener('pointerup', endHold);
+document.addEventListener('pointercancel', endHold);
 // ボタンに長押しイベントを付与
 function addHold(btnEl,id,smallDelta,largeDelta){
   btnEl.addEventListener('pointerdown',e=>{e.preventDefault();startHold(id,smallDelta,largeDelta);});
-  btnEl.addEventListener('pointerup',endHold);
-  btnEl.addEventListener('pointerleave',endHold);
-  btnEl.addEventListener('pointercancel',endHold);
 }
 
 let open=true;
@@ -778,6 +802,7 @@ document.getElementById('btn-reset').addEventListener('click',()=>{
   if(rtv) rtv.textContent='0';
   if(rtj){rtj.textContent='—';rtj.style.color='#555';}
   const hb=document.getElementById('rtBig');if(hb)hb.value=0;
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
   calc();
 });
 
@@ -803,17 +828,28 @@ document.querySelectorAll('[data-hold-retro]').forEach(btn=>{
     stepRetro(d);
     _holdTimer=setTimeout(()=>{_holdInterval=setInterval(()=>stepRetro(d),80);},500);
   });
-  btn.addEventListener('pointerup',endHold);
-  btn.addEventListener('pointerleave',endHold);
-  btn.addEventListener('pointercancel',endHold);
 });
 // cnt-val-inp（サイドランプ・フェザー）のinputイベントと長押し登録
 document.querySelectorAll('.cnt-val-inp').forEach(inp=>{
   const id=inp.id.replace('_v','');
   inp.addEventListener('input',()=>{
     CNT[id]=Math.max(0,parseInt(inp.value)||0);
-    inp.value=CNT[id];
-    cntUpdate(id,0); // 集計のみ
+    // 集計を再実行
+    const fBH=CNT.fB_bl+CNT.fB_ye+CNT.fB_gr+CNT.fB_rd+CNT.fB_rb;
+    const fBT=Number(document.getElementById('big')?.value)||0;
+    const el_fBT=document.getElementById('fBigTotal'); if(el_fBT) el_fBT.value=fBT;
+    const el_fBH=document.getElementById('fBigHit'); if(el_fBH) el_fBH.value=fBH;
+    const fRT=Number(document.getElementById('reg')?.value)||0;
+    const el_fRT=document.getElementById('fRegTotal'); if(el_fRT) el_fRT.value=fRT;
+    ['bl','ye','gr','rd','rb'].forEach(c=>{const e=document.getElementById(`fR_${c}_cnt`);if(e)e.value=CNT[`fR_${c}`];});
+    const slOdd=CNT.sl_bl+CNT.sl_gr, slEve=CNT.sl_ye+CNT.sl_rd;
+    const el_slT=document.getElementById('slTotal');if(el_slT)el_slT.value=slOdd+slEve+CNT.sl_rb;
+    const el_slL=document.getElementById('slLeft');if(el_slL)el_slL.value=slOdd;
+    const el_slR=document.getElementById('slRight');if(el_slR)el_slR.value=slEve;
+    const el_slRb=document.getElementById('slRainbow');if(el_slRb)el_slRb.value=CNT.sl_rb;
+    const el_odd=document.getElementById('sl_odd_v');if(el_odd)el_odd.textContent=slOdd;
+    const el_eve=document.getElementById('sl_eve_v');if(el_eve)el_eve.textContent=slEve;
+    calc();
   });
   inp.addEventListener('focus',()=>inp.select());
 });
@@ -826,13 +862,62 @@ document.querySelectorAll('.cm,.cp').forEach(btn=>{
     cntUpdate(t,d);
     _holdTimer=setTimeout(()=>{_holdInterval=setInterval(()=>cntUpdate(t,d),80);},500);
   });
-  btn.addEventListener('pointerup',endHold);
-  btn.addEventListener('pointerleave',endHold);
-  btn.addEventListener('pointercancel',endHold);
 });
+// ── 保存・復元 ──
+const SAVE_KEY='khh30_data';
+
+function saveData(){
+  const data={
+    inputs:{},
+    cnt:{...CNT},
+    retro:parseInt(document.getElementById('rt-total-v')?.textContent)||0
+  };
+  ['games','big','reg','bell','bigSuika'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) data.inputs[id]=el.value;
+  });
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));}catch(e){}
+}
+
+function loadData(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    // 数値input復元
+    Object.entries(data.inputs||{}).forEach(([id,v])=>{
+      const el=document.getElementById(id);
+      if(el){el.value=v;el.dispatchEvent(new Event('input'));}
+    });
+    // CNTカウンター復元
+    Object.entries(data.cnt||{}).forEach(([k,v])=>{
+      if(CNT.hasOwnProperty(k)){
+        CNT[k]=v;
+        const el=document.getElementById(k+'_v');
+        if(el) el.value=v;
+      }
+    });
+    // CNT集計（サイドランプ・フェザー）を再反映
+    cntUpdate('sl_bl',0);
+    // レトロ復元
+    const rtv=document.getElementById('rt-total-v');
+    if(rtv && data.retro){
+      rtv.textContent=data.retro;
+      const hb=document.getElementById('rtBig');
+      if(hb) hb.value=data.retro;
+    }
+    calc();
+  }catch(e){}
+}
+
+// 入力変化のたびに保存
+document.addEventListener('input',()=>saveData());
+document.addEventListener('pointerup',()=>setTimeout(saveData,50));
+
 // 初期表示
 document.getElementById('ra').textContent='▲';
-renderEmpty();
+loadData();
+if(!document.getElementById('games').value) renderEmpty();
 layoutRP();
 window.addEventListener('resize',layoutRP);
 </script>
