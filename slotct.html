@@ -2,15 +2,21 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
 <title>スロットカウンター</title>
 <style>
+  html{height:-webkit-fill-available}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#111318;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;height:100dvh;width:100vw;background-size:cover;background-position:center;background-repeat:no-repeat}
+  body{background:#111318;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;height:100dvh;height:100svh;min-height:-webkit-fill-available;width:100vw;background-size:cover;background-position:center;background-repeat:no-repeat}
   input{outline:none}
   button{cursor:pointer}
 
-  #app-por, #app-lan { width:100vw; height:100dvh; padding:8px; gap:8px; overflow:hidden; }
+  #app-por, #app-lan { width:100vw; height:100dvh; height:100svh; max-height:-webkit-fill-available; gap:8px; overflow:hidden; }
+  #app-por { padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
+  #app-lan { padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
   #app-por { display:flex; flex-direction:column; }
   #app-lan { display:none; flex-direction:row; }
 
@@ -35,7 +41,7 @@
   .tab{flex:1;padding:4px 0;font-size:10px;font-weight:700;border:none;background:#0d0f14;color:#555}
   .tab.active{color:inherit}
 
-  .counter-scroll{flex:1;min-height:0;min-width:0;overflow-y:auto}
+  .counter-scroll{flex:1;min-height:0;min-width:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
   .card{border-radius:12px;padding:7px 9px;display:flex;flex-direction:column;gap:5px;background:rgba(28,31,38,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
