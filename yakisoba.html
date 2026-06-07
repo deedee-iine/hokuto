@@ -2,89 +2,107 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>売上計算表</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100dvh}
-  body{font-family:'Zen Maru Gothic',sans-serif;background:#c0392b;display:flex;flex-direction:column;height:100dvh;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100dvh;overflow:hidden;touch-action:none}
+  body{font-family:'Zen Maru Gothic',sans-serif;background:#c0392b;display:flex;flex-direction:column;height:100dvh;
+    padding-top:env(safe-area-inset-top,0);
+    padding-right:env(safe-area-inset-right,0);
+    padding-bottom:env(safe-area-inset-bottom,0);
+    padding-left:env(safe-area-inset-left,0)}
 
-  /* ===== MAIN CARD ===== */
-  .card{background:#fdf6e3;flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .card-title{background:#2c1810;color:#f4d03f;text-align:center;padding:8px;font-size:.85rem;letter-spacing:.1em;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
+  .card{background:#fdf6e3;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+  .card-title{background:#2c1810;color:#f4d03f;text-align:center;font-size:.85rem;letter-spacing:.1em;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:8px 12px}
   .title-text{flex:1;text-align:center}
-  .edit-btn{background:#f4d03f;color:#2c1810;border:none;border-radius:6px;padding:4px 10px;font-family:inherit;font-size:.75rem;font-weight:900;cursor:pointer;flex-shrink:0}
-  .edit-btn:active{opacity:.8}
+  .edit-btn{background:#f4d03f;color:#2c1810;border:none;border-radius:6px;padding:4px 10px;font-family:inherit;font-size:.75rem;font-weight:900;cursor:pointer}
 
-  .items{flex:1;display:flex;flex-direction:column;overflow-y:auto}
-  .item{flex:1;min-height:60px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #ede0c4;gap:8px;min-width:0}
+  .items{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+  .item{flex:1;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #ede0c4;gap:8px;min-width:0;min-height:0}
   .item:last-of-type{border-bottom:none}
   .em{font-size:1.5rem;width:30px;text-align:center;flex-shrink:0}
   .name-block{flex-shrink:0;width:80px}
   .name{font-size:.95rem;font-weight:700;color:#2c1810;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
-  .price{font-size:.75rem;color:#7d4e2d}
+  .price-tag{font-size:.75rem;color:#7d4e2d}
   .counter{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
   .btn{width:38px;height:38px;border-radius:50%;border:none;font-size:1.2rem;font-weight:900;cursor:pointer;font-family:inherit;line-height:1;flex-shrink:0}
-  .btn-m{background:#eee;color:#7d4e2d}.btn-m:active{background:#ddd}
-  .btn-p{background:#c0392b;color:#fff}.btn-p:active{background:#922b21}
-  .btn:active{transform:scale(.9)}
+  .btn-m{background:#eee;color:#7d4e2d}
+  .btn-p{background:#c0392b;color:#fff}
+  .btn:active{transform:scale(.88)}
   .cnt{font-size:1.3rem;font-weight:900;color:#2c1810;width:28px;text-align:center;flex-shrink:0}
   .sub{font-size:1.2rem;font-weight:900;color:#c0392b;width:72px;text-align:right;flex-shrink:0;white-space:nowrap}
 
-  .footer{padding:14px 16px calc(14px + env(safe-area-inset-bottom,0));background:#2c1810;flex-shrink:0}
+  .footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));background:#2c1810;flex-shrink:0}
   .total-box{display:flex;justify-content:space-between;align-items:center}
   .total-label{color:#f4d03f;font-size:1rem;font-weight:700}
   .total-amt{color:#f4d03f;font-size:2.8rem;font-weight:900}
-  .reset{margin-top:10px;width:100%;padding:10px;background:transparent;border:1.5px solid #7d4e2d;border-radius:6px;color:#aaa;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
+  .reset{margin-top:8px;width:100%;padding:9px;background:transparent;border:1.5px solid #7d4e2d;border-radius:6px;color:#aaa;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
   .reset:active{background:#7d4e2d;color:#fff}
-
-  /* ===== EDIT MODAL ===== */
-  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10;align-items:center;justify-content:center;padding:16px}
-  .overlay.open{display:flex}
-  .modal{background:#fdf6e3;border-radius:12px;width:100%;max-width:420px;max-height:90dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-  .modal-head{background:#2c1810;color:#f4d03f;padding:12px 16px;font-size:.9rem;font-weight:700;letter-spacing:.05em;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-  .modal-close{background:none;border:none;color:#f4d03f;font-size:1.4rem;cursor:pointer;line-height:1;padding:0 4px}
-  .modal-body{overflow-y:auto;flex:1;padding:12px}
-  .edit-row{display:flex;align-items:center;gap:8px;padding:8px 6px;border-bottom:1px solid #ede0c4}
-  .edit-row:last-of-type{border-bottom:none}
-  .edit-em{font-size:1.4rem;width:28px;text-align:center;flex-shrink:0}
-  .edit-name{flex:1;border:1.5px solid #ddd;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:.9rem;color:#2c1810;background:#fff;min-width:0}
-  .edit-price{width:74px;border:1.5px solid #ddd;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:.9rem;color:#2c1810;background:#fff;text-align:right;flex-shrink:0}
-  .edit-name:focus,.edit-price:focus{outline:none;border-color:#c0392b}
-  .del-btn{width:30px;height:30px;border-radius:50%;border:none;background:#eee;color:#999;font-size:1.1rem;cursor:pointer;flex-shrink:0;line-height:1}
-  .del-btn:active{background:#e74c3c;color:#fff}
-  .add-row{padding:10px 6px}
-  .add-btn{width:100%;padding:10px;background:#c0392b;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
-  .add-btn:active{background:#922b21}
-  .modal-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));border-top:1px solid #ede0c4;flex-shrink:0}
-  .save-btn{width:100%;padding:12px;background:#2c1810;color:#f4d03f;border:none;border-radius:8px;font-family:inherit;font-size:1rem;font-weight:900;cursor:pointer}
-  .save-btn:active{opacity:.85}
 
   /* ===== LANDSCAPE ===== */
   @media (orientation:landscape){
     .card{flex-direction:row}
     .card-title{display:none}
-    .items{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(auto-fill,minmax(0,1fr));min-width:0}
-    .item{border-bottom:1px solid #ede0c4;border-right:1px solid #ede0c4;padding:0 8px;gap:5px;min-width:0;min-height:0}
+    .items{
+      flex:1;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      grid-auto-rows:1fr;
+      overflow:hidden;
+      min-width:0;
+      min-height:0;
+      height:100%;
+    }
+    .item{
+      border-bottom:1px solid #ede0c4;
+      border-right:1px solid #ede0c4;
+      padding:0 8px;gap:5px;
+      min-width:0;min-height:0;
+      flex:unset;
+    }
     .item:nth-child(2n){border-right:none}
-    .item:nth-child(odd):last-child{grid-column:span 2}
-    .em{font-size:1.3rem;width:26px}
-    .name-block{width:60px}
-    .name{font-size:.8rem;max-width:58px}
-    .price{font-size:.68rem}
+    /* 下の行のborder-bottomを消す（2行の場合は3,4番目） */
+    .item:nth-last-child(1),.item:nth-last-child(2){border-bottom:none}
+    .em{font-size:1.2rem;width:24px}
+    .name-block{width:58px}
+    .name{font-size:.78rem;max-width:56px}
+    .price-tag{font-size:.65rem}
     .btn{width:32px;height:32px;font-size:1rem}
     .cnt{font-size:1.1rem;width:22px}
-    .sub{font-size:1rem;width:60px}
-    .footer{width:148px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:14px 12px calc(14px + env(safe-area-inset-bottom,0))}
-    .total-box{flex-direction:column;align-items:flex-start;gap:4px}
-    .total-amt{font-size:1.8rem}
-    /* edit btn visible in landscape via footer */
-    .landscape-edit{display:block;margin-top:10px;width:100%;padding:8px;background:#f4d03f;color:#2c1810;border:none;border-radius:6px;font-family:inherit;font-size:.8rem;font-weight:900;cursor:pointer}
+    .sub{font-size:.95rem;width:58px}
+    .footer{
+      width:145px;flex-shrink:0;
+      display:flex;flex-direction:column;justify-content:center;
+      padding:12px 12px calc(12px + env(safe-area-inset-bottom,0));
+      gap:0;
+    }
+    .total-box{flex-direction:column;align-items:flex-start;gap:2px}
+    .total-amt{font-size:1.7rem}
+    .landscape-edit{display:block;margin-top:10px;width:100%;padding:8px;background:#f4d03f;color:#2c1810;border:none;border-radius:6px;font-family:inherit;font-size:.78rem;font-weight:900;cursor:pointer}
   }
-  @media (orientation:portrait){
-    .landscape-edit{display:none}
-  }
+  @media (orientation:portrait){.landscape-edit{display:none}}
+
+  /* ===== EDIT MODAL ===== */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10;align-items:center;justify-content:center;padding:16px;touch-action:auto}
+  .overlay.open{display:flex}
+  .modal{background:#fdf6e3;border-radius:12px;width:100%;max-width:400px;max-height:85dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+  .modal-head{background:#2c1810;color:#f4d03f;padding:10px 14px;font-size:.9rem;font-weight:700;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+  .modal-close{background:none;border:none;color:#f4d03f;font-size:1.3rem;cursor:pointer}
+  .modal-body{overflow-y:auto;flex:1;padding:10px;touch-action:pan-y}
+  .edit-row{display:flex;align-items:center;gap:7px;padding:7px 4px;border-bottom:1px solid #ede0c4}
+  .edit-row:last-of-type{border-bottom:none}
+  .edit-em{font-size:1.3rem;width:26px;text-align:center;flex-shrink:0}
+  .edit-name{flex:1;border:1.5px solid #ddd;border-radius:6px;padding:6px 7px;font-family:inherit;font-size:.88rem;color:#2c1810;background:#fff;min-width:0}
+  .edit-price{width:70px;border:1.5px solid #ddd;border-radius:6px;padding:6px 7px;font-family:inherit;font-size:.88rem;color:#2c1810;background:#fff;text-align:right;flex-shrink:0}
+  .edit-name:focus,.edit-price:focus{outline:none;border-color:#c0392b}
+  .del-btn{width:28px;height:28px;border-radius:50%;border:none;background:#eee;color:#999;font-size:1rem;cursor:pointer;flex-shrink:0;line-height:1}
+  .del-btn:active{background:#e74c3c;color:#fff}
+  .add-row{padding:10px 4px}
+  .add-btn{width:100%;padding:9px;background:#c0392b;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:.88rem;font-weight:700;cursor:pointer}
+  .modal-footer{padding:10px 14px;border-top:1px solid #ede0c4;flex-shrink:0}
+  .save-btn{width:100%;padding:11px;background:#2c1810;color:#f4d03f;border:none;border-radius:8px;font-family:inherit;font-size:.95rem;font-weight:900;cursor:pointer}
 </style>
 </head>
 <body>
@@ -104,7 +122,6 @@
   </div>
 </div>
 
-<!-- 編集モーダル -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-head">
@@ -119,85 +136,78 @@
 </div>
 
 <script>
-  const EMOJIS = ['🍜','🍢','🌭','🥤','🍱','🍙','🍦','🍺','🧃','🍗','🥩','🍕'];
-  let menu = [
-    {name:'焼きそば', price:200, em:'🍜'},
-    {name:'豚串',    price:200, em:'🍢'},
-    {name:'フランク', price:100, em:'🌭'},
-    {name:'ドリンク', price:100, em:'🥤'},
+  const EMOJIS=['🍜','🍢','🌭','🥤','🍱','🍙','🍦','🍺','🧃','🍗','🥩','🍕'];
+  let menu=[
+    {name:'焼きそば',price:200,em:'🍜'},
+    {name:'豚串',price:200,em:'🍢'},
+    {name:'フランク',price:100,em:'🌭'},
+    {name:'ドリンク',price:100,em:'🥤'},
   ];
-  let counts = menu.map(() => 0);
+  let counts=menu.map(()=>0);
 
-  function render() {
-    const container = document.getElementById('items');
-    container.innerHTML = menu.map((m, i) => `
+  function render(){
+    document.getElementById('items').innerHTML=menu.map((m,i)=>`
       <div class="item">
         <span class="em">${m.em}</span>
         <div class="name-block">
           <div class="name">${m.name}</div>
-          <div class="price">¥${m.price}</div>
+          <div class="price-tag">¥${m.price}</div>
         </div>
         <div class="counter">
           <button class="btn btn-m" onclick="ch(${i},-1)">－</button>
           <span class="cnt">${counts[i]}</span>
           <button class="btn btn-p" onclick="ch(${i},1)">＋</button>
         </div>
-        <div class="sub">¥${(m.price * counts[i]).toLocaleString()}</div>
+        <div class="sub">¥${(m.price*counts[i]).toLocaleString()}</div>
       </div>`).join('');
-    const t = menu.reduce((s, m, i) => s + m.price * counts[i], 0);
-    document.getElementById('total').textContent = '¥' + t.toLocaleString();
+    const t=menu.reduce((s,m,i)=>s+m.price*counts[i],0);
+    document.getElementById('total').textContent='¥'+t.toLocaleString();
   }
 
-  function ch(i, d) { counts[i] = Math.max(0, counts[i] + d); render(); }
-  function resetAll() { counts.fill(0); render(); }
+  function ch(i,d){counts[i]=Math.max(0,counts[i]+d);render();}
+  function resetAll(){counts.fill(0);render();}
 
-  // 編集モーダル
-  function openEdit() {
-    const body = document.getElementById('edit-body');
-    body.innerHTML = menu.map((m, i) => `
-      <div class="edit-row" id="erow-${i}">
-        <span class="edit-em">${m.em}</span>
-        <input class="edit-name" type="text" value="${m.name}" placeholder="商品名" maxlength="8" id="ename-${i}">
-        <input class="edit-price" type="number" value="${m.price}" placeholder="金額" min="0" step="10" id="eprice-${i}">
-        <button class="del-btn" onclick="delItem(${i})">🗑</button>
-      </div>`).join('')
-      + `<div class="add-row"><button class="add-btn" onclick="addItem()">＋ メニューを追加</button></div>`;
+  function openEdit(){
+    document.getElementById('edit-body').innerHTML=
+      menu.map((m,i)=>`
+        <div class="edit-row">
+          <span class="edit-em">${m.em}</span>
+          <input class="edit-name" type="text" value="${m.name}" maxlength="8" id="en${i}">
+          <input class="edit-price" type="number" value="${m.price}" min="0" step="10" id="ep${i}">
+          <button class="del-btn" onclick="delItem(${i})">✕</button>
+        </div>`).join('')+
+      `<div class="add-row"><button class="add-btn" onclick="addItem()">＋ メニューを追加</button></div>`;
     document.getElementById('overlay').classList.add('open');
   }
 
-  function closeEdit() {
-    document.getElementById('overlay').classList.remove('open');
+  function closeEdit(){document.getElementById('overlay').classList.remove('open');}
+
+  function delItem(i){
+    if(menu.length<=1)return;
+    menu.splice(i,1);counts.splice(i,1);openEdit();
   }
 
-  function delItem(i) {
-    if (menu.length <= 1) return;
-    menu.splice(i, 1);
-    counts.splice(i, 1);
-    openEdit();
-  }
-
-  function addItem() {
-    if (menu.length >= 8) return;
-    const ei = EMOJIS[menu.length % EMOJIS.length];
-    menu.push({name: '新メニュー', price: 100, em: ei});
+  function addItem(){
+    if(menu.length>=8)return;
+    menu.push({name:'新メニュー',price:100,em:EMOJIS[menu.length%EMOJIS.length]});
     counts.push(0);
     openEdit();
-    // 追加行にスクロール
-    setTimeout(() => {
-      const body = document.getElementById('edit-body');
-      body.scrollTop = body.scrollHeight;
-    }, 50);
+    setTimeout(()=>{const b=document.getElementById('edit-body');b.scrollTop=b.scrollHeight;},50);
   }
 
-  function saveEdit() {
-    menu = menu.map((m, i) => {
-      const name = (document.getElementById(`ename-${i}`)?.value || m.name).trim() || m.name;
-      const price = parseInt(document.getElementById(`eprice-${i}`)?.value) || 0;
-      return {...m, name, price};
+  function saveEdit(){
+    menu=menu.map((m,i)=>{
+      const name=(document.getElementById(`en${i}`)?.value||m.name).trim()||m.name;
+      const price=parseInt(document.getElementById(`ep${i}`)?.value)||0;
+      return{...m,name,price};
     });
-    closeEdit();
-    render();
+    closeEdit();render();
   }
+
+  // スクロール禁止（モーダル外）
+  document.addEventListener('touchmove',e=>{
+    if(!e.target.closest('.modal-body'))e.preventDefault();
+  },{passive:false});
 
   render();
 </script>
