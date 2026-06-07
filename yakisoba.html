@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売上計算表</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Zen Maru Gothic',sans-serif;background:#c0392b;display:flex;flex-direction:column;height:100vh;padding:10px}
+  .card{background:#fdf6e3;border-radius:10px;flex:1;display:flex;flex-direction:column;box-shadow:0 6px 0 #922b21;overflow:hidden}
+  .card-title{background:#2c1810;color:#f4d03f;text-align:center;padding:10px;font-size:.9rem;letter-spacing:.1em;flex-shrink:0}
+  .items{flex:1;display:flex;flex-direction:column}
+  .item{flex:1;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #ede0c4;gap:8px;min-width:0}
+  .item:last-of-type{border-bottom:none}
+  .em{font-size:1.6rem;width:32px;text-align:center;flex-shrink:0}
+  .name-block{flex-shrink:0;width:80px}
+  .name{font-size:.95rem;font-weight:700;color:#2c1810;white-space:nowrap}
+  .price{font-size:.75rem;color:#7d4e2d}
+  .counter{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn{width:38px;height:38px;border-radius:50%;border:none;font-size:1.2rem;font-weight:900;cursor:pointer;font-family:inherit;line-height:1;flex-shrink:0}
+  .btn-m{background:#eee;color:#7d4e2d}.btn-m:hover{background:#ddd}
+  .btn-p{background:#c0392b;color:#fff}.btn-p:hover{background:#922b21}
+  .btn:active{transform:scale(.9)}
+  .cnt{font-size:1.3rem;font-weight:900;color:#2c1810;width:28px;text-align:center;flex-shrink:0}
+  .sub{font-size:1.2rem;font-weight:900;color:#c0392b;width:72px;text-align:right;flex-shrink:0;white-space:nowrap}
+  .footer{padding:14px 16px;background:#2c1810;flex-shrink:0}
+  .total-box{display:flex;justify-content:space-between;align-items:center}
+  .total-label{color:#f4d03f;font-size:1rem;font-weight:700}
+  .total-amt{color:#f4d03f;font-size:2.8rem;font-weight:900}
+  .reset{margin-top:10px;width:100%;padding:10px;background:transparent;border:1.5px solid #7d4e2d;border-radius:6px;color:#aaa;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer}
+  .reset:hover{background:#7d4e2d;color:#fff}
+
+  @media (orientation:landscape){
+    .card{flex-direction:row}
+    .card-title{display:none}
+    .items{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;min-width:0}
+    .item{border-bottom:1px solid #ede0c4;border-right:1px solid #ede0c4;padding:0 8px;gap:5px;min-width:0}
+    .item:nth-child(2n){border-right:none}
+    .item:nth-child(3),.item:nth-child(4){border-bottom:none}
+    .em{font-size:1.3rem;width:26px}
+    .name-block{width:60px}
+    .name{font-size:.8rem}
+    .price{font-size:.68rem}
+    .btn{width:32px;height:32px;font-size:1rem}
+    .cnt{font-size:1.1rem;width:22px}
+    .sub{font-size:1rem;width:60px}
+    .footer{width:148px;flex-shrink:0;display:flex;flex-direction:column;justify-content:center;padding:14px 12px}
+    .total-box{flex-direction:column;align-items:flex-start;gap:4px}
+    .total-amt{font-size:1.8rem}
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-title">🏮 売上計算表 🏮</div>
+  <div class="items" id="items"></div>
+  <div class="footer">
+    <div class="total-box">
+      <span class="total-label">🧾 合計</span>
+      <span class="total-amt" id="total">¥0</span>
+    </div>
+    <button class="reset" onclick="reset()">🔄 リセット</button>
+  </div>
+</div>
+<script>
+  const menu=[
+    {name:'焼きそば',price:200,em:'🍜'},
+    {name:'豚串',price:200,em:'🍢'},
+    {name:'フランク',price:100,em:'🌭'},
+    {name:'ドリンク',price:100,em:'🥤'},
+  ];
+  const c=menu.map(()=>0);
+  function render(){
+    document.getElementById('items').innerHTML=menu.map((m,i)=>`
+      <div class="item">
+        <span class="em">${m.em}</span>
+        <div class="name-block">
+          <div class="name">${m.name}</div>
+          <div class="price">¥${m.price}</div>
+        </div>
+        <div class="counter">
+          <button class="btn btn-m" onclick="ch(${i},-1)">－</button>
+          <span class="cnt">${c[i]}</span>
+          <button class="btn btn-p" onclick="ch(${i},1)">＋</button>
+        </div>
+        <div class="sub">¥${(m.price*c[i]).toLocaleString()}</div>
+      </div>`).join('');
+    const t=menu.reduce((s,m,i)=>s+m.price*c[i],0);
+    document.getElementById('total').textContent='¥'+t.toLocaleString();
+  }
+  function ch(i,d){c[i]=Math.max(0,c[i]+d);render();}
+  function reset(){c.fill(0);render();}
+  render();
+</script>
+</body>
+</html>
