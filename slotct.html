@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>スロットカウンター</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#111318;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;height:100dvh;width:100vw;background-size:cover;background-position:center;background-repeat:no-repeat}
+  input{outline:none}
+  button{cursor:pointer}
+
+  #app-por, #app-lan { width:100vw; height:100dvh; padding:8px; gap:8px; overflow:hidden; }
+  #app-por { display:flex; flex-direction:column; }
+  #app-lan { display:none; flex-direction:row; }
+
+  @media (orientation:landscape){
+    #app-por{display:none!important}
+    #app-lan{display:flex!important}
+  }
+  @media (orientation:portrait){
+    #app-por{display:flex!important}
+    #app-lan{display:none!important}
+  }
+
+  .game-panel{background:rgba(28,31,38,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #f5a62344;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+  .game-panel-lan{background:rgba(28,31,38,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid #f5a62344;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .game-label{font-size:10px;color:#f5a623;letter-spacing:1px}
+  .game-row{display:flex;align-items:center;gap:6px}
+  .game-input{flex:1;background:#0d0f14;border:1px solid #f5a62355;border-radius:8px;color:#f5a623;font-size:26px;font-weight:900;padding:3px 0;text-align:center;min-width:0;width:100%}
+  .game-input-lan{width:100%;background:#0d0f14;border:1px solid #f5a62355;border-radius:8px;color:#f5a623;font-size:36px;font-weight:900;padding:6px 0;text-align:center}
+  .game-btns-lan{display:flex;gap:6px}
+
+  .tabs{display:flex;border-radius:6px;overflow:hidden;flex-shrink:0}
+  .tab{flex:1;padding:4px 0;font-size:10px;font-weight:700;border:none;background:#0d0f14;color:#555}
+  .tab.active{color:inherit}
+
+  .counter-scroll{flex:1;min-height:0;min-width:0;overflow-y:auto}
+  .counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+  .card{border-radius:12px;padding:7px 9px;display:flex;flex-direction:column;gap:5px;background:rgba(28,31,38,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .card-header{display:flex;align-items:center;justify-content:space-between}
+  .card-title{display:flex;align-items:center;gap:4px}
+  .card-emoji{font-size:15px}
+  .card-label{font-size:11px;font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-right{display:flex;gap:2px;align-items:center}
+  .card-prob{font-size:13px;font-weight:700;min-width:44px;text-align:right;color:#aaa}
+  .icon-btn{background:none;border:none;color:#444;font-size:11px;padding:1px 2px}
+  .count-input{width:100%;background:#0d0f14;border-radius:8px;font-size:26px;font-weight:900;text-align:center;padding:2px 0;color:inherit}
+  .card-btns{display:flex;gap:4px}
+  .btn-dec{flex:1;padding:5px 0;background:#0d0f14;border:1px solid #2a2d35;border-radius:7px;color:#aaa;font-size:14px;font-weight:700}
+  .btn-inc{flex:2;padding:5px 0;border-radius:7px;font-size:14px;font-weight:900}
+  .btn-rst{flex:1;padding:5px 0;background:#0d0f14;border:1px solid #222;border-radius:7px;color:#444;font-size:9px}
+  .btn-add{background:rgba(28,31,38,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px dashed #2a2d35;border-radius:12px;color:#555;font-size:22px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;min-height:60px}
+  .btn-add span.small{font-size:10px}
+
+  .reset-btn{padding:6px;background:none;border:1px solid #2a2d35;border-radius:8px;color:#444;font-size:11px;width:100%}
+
+  /* モーダル */
+  #modal{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:99;padding:16px;overflow-y:auto}
+  #modal.open{display:flex}
+  .modal-box{background:#1c1f26;border:1px solid #333;border-radius:16px;padding:18px;width:100%;max-width:330px}
+  .modal-title{font-size:12px;color:#aaa;margin-bottom:12px}
+  .modal-emoji-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .modal-emoji-preview{font-size:28px}
+  .modal-emoji-input{flex:1;background:#0d0f14;border:1px solid #333;border-radius:8px;color:#fff;font-size:15px;padding:6px 10px}
+  .preset-group{margin-bottom:8px}
+  .preset-group-label{font-size:10px;color:#555;margin-bottom:3px}
+  .preset-emojis{display:flex;flex-wrap:wrap;gap:3px}
+  .preset-btn{font-size:17px;padding:2px 4px;background:#0d0f14;border:1px solid #222;border-radius:6px}
+  .preset-btn.sel{background:rgba(245,166,35,0.25);border-color:#f5a623}
+  .modal-label-input{width:100%;background:#0d0f14;border:1px solid #333;border-radius:8px;color:#fff;font-size:15px;padding:6px 10px;margin-top:8px;margin-bottom:14px}
+  .modal-btns{display:flex;gap:8px}
+  .modal-cancel{flex:1;padding:8px;background:#0d0f14;border:1px solid #2a2d35;border-radius:8px;color:#888}
+  .modal-save{flex:2;padding:8px;background:#f5a623;border:none;border-radius:8px;color:#000;font-weight:900}
+
+  .side-panel{width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+</style>
+</head>
+<body>
+
+<!-- 縦向き -->
+<div id="app-por">
+  <div class="game-panel">
+    <div class="game-label">① ゲーム数</div>
+    <div class="game-row">
+      <button class="tab" id="por-dec" style="flex:0;padding:5px 9px;border-radius:7px;font-size:16px;font-weight:900;background:#88888818;border:1px solid #88888844;color:#888">－</button>
+      <input class="game-input" id="por-games" inputmode="numeric" pattern="[0-9]*" value="0">
+      <button class="tab" id="por-inc" style="flex:0;padding:5px 9px;border-radius:7px;font-size:16px;font-weight:900;background:#f5a62318;border:1px solid #f5a62344;color:#f5a623">＋</button>
+    </div>
+    <div class="tabs" id="por-step-tabs" style="border:1px solid #f5a62333"></div>
+  </div>
+  <div class="counter-scroll">
+    <div class="counter-grid" id="por-grid"></div>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="reset-btn" id="por-reset" style="flex:1">全リセット</button>
+    <button class="reset-btn" id="por-bg-btn" style="flex:0;padding:6px 10px;white-space:nowrap">🖼️ 背景</button>
+  </div>
+</div>
+
+<!-- 横向き -->
+<div id="app-lan">
+  <div class="side-panel">
+    <div class="game-panel-lan">
+      <div class="game-label">① ゲーム数</div>
+      <input class="game-input-lan" id="lan-games" inputmode="numeric" pattern="[0-9]*" value="0">
+      <div class="game-btns-lan">
+        <button id="lan-dec" style="flex:1;padding:7px 0;background:#88888818;border:1px solid #88888844;border-radius:7px;color:#888;font-size:18px;font-weight:900">－</button>
+        <button id="lan-inc" style="flex:1;padding:7px 0;background:#f5a62318;border:1px solid #f5a62344;border-radius:7px;color:#f5a623;font-size:18px;font-weight:900">＋</button>
+      </div>
+      <div class="tabs" id="lan-step-tabs" style="border:1px solid #f5a62333"></div>
+    </div>
+    <button class="reset-btn" id="lan-reset">全リセット</button>
+    <button class="reset-btn" id="lan-bg-btn" style="padding:6px 10px">🖼️ 背景</button>
+  </div>
+  <div class="counter-scroll">
+    <div class="counter-grid" id="lan-grid"></div>
+  </div>
+</div>
+
+
+<!-- 背景モーダル -->
+<div id="bg-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:99;padding:16px">
+  <div style="background:#1c1f26;border:1px solid #333;border-radius:16px;padding:18px;width:100%;max-width:330px">
+    <div style="font-size:12px;color:#aaa;margin-bottom:12px">背景を設定</div>
+
+    <!-- プレビュー -->
+    <div id="bg-preview" style="width:100%;height:80px;border-radius:8px;background:#0d0f14;border:1px solid #333;margin-bottom:12px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#444;font-size:12px">プレビュー</div>
+
+    <!-- 画像アップロード -->
+    <label style="display:block;width:100%;padding:9px;background:#f5a62322;border:1px solid #f5a62366;border-radius:8px;color:#f5a623;font-size:13px;font-weight:700;text-align:center;cursor:pointer;margin-bottom:10px">
+      📁 画像を選択
+      <input type="file" id="bg-file" accept="image/*" style="display:none">
+    </label>
+
+    <!-- 暗さスライダー -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:#aaa;margin-bottom:5px">暗さ: <span id="overlay-val">50</span>%</div>
+      <input type="range" id="overlay-slider" min="0" max="90" value="50" style="width:100%;accent-color:#f5a623">
+    </div>
+
+    <!-- プリセット色 -->
+    <div style="font-size:11px;color:#aaa;margin-bottom:6px">背景色</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="color-presets"></div>
+
+    <!-- クリアボタン -->
+    <button id="bg-clear" style="width:100%;padding:7px;background:none;border:1px solid #333;border-radius:8px;color:#666;font-size:12px;margin-bottom:10px">背景をクリア</button>
+
+    <div style="display:flex;gap:8px">
+      <button id="bg-cancel" style="flex:1;padding:8px;background:#0d0f14;border:1px solid #2a2d35;border-radius:8px;color:#888">キャンセル</button>
+      <button id="bg-save" style="flex:2;padding:8px;background:#f5a623;border:none;border-radius:8px;color:#000;font-weight:900">適用</button>
+    </div>
+  </div>
+</div>
+<!-- モーダル -->
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">項目を追加</div>
+    <div class="modal-emoji-row">
+      <span class="modal-emoji-preview" id="modal-emoji-preview">⭐</span>
+      <input class="modal-emoji-input" id="modal-emoji-input" placeholder="絵文字">
+    </div>
+    <div id="preset-area"></div>
+    <input class="modal-label-input" id="modal-label-input" placeholder="ラベル名">
+    <div class="modal-btns">
+      <button class="modal-cancel" id="modal-cancel">キャンセル</button>
+      <button class="modal-save" id="modal-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ACCENTS = ["#60a5fa","#fbbf24","#f87171","#34d399","#a78bfa","#fb923c","#e879f9","#2dd4bf","#f472b6","#a3e635"];
+const PRESET_GROUPS = [
+  { label:"⬛ シリーズ", emojis:["⬛","🟫","🟥","🟧","🟨","🟩","🟦","🟪","⬜"] },
+  { label:"🔵 シリーズ", emojis:["🔵","🔴","🟠","🟡","🟢","🟣","⚫","⚪","🔶","🔷"] },
+  { label:"フルーツ",    emojis:["🍒","🍉","🍋","🍇","🍊","🍎","🍓","🍑","🥝"] },
+  { label:"その他",      emojis:["🔔","🌈","⭐","💎","🎰","⚡","🎯","💰","🃏","🎲"] },
+];
+const STEP_OPTS = [1,10,100];
+
+let uid = 20;
+let games = 0;
+let gStep = 1;
+let modalTarget = null; // null | "new" | id
+let counters = [
+  {id:0,emoji:"🔵",label:"リプレイ",count:0,step:1,accent:ACCENTS[0]},
+  {id:1,emoji:"🔔",label:"ベル",    count:0,step:1,accent:ACCENTS[1]},
+  {id:2,emoji:"🍒",label:"チェリー",count:0,step:1,accent:ACCENTS[2]},
+  {id:3,emoji:"🍉",label:"スイカ",  count:0,step:1,accent:ACCENTS[3]},
+];
+
+// ---- ゲーム数 ----
+function numInput(e){
+  const v = e.target.value.replace(/[^0-9]/g,"");
+  games = v===""?0:parseInt(v,10);
+  syncGamesUI();
+  renderGrids();
+}
+function syncGamesUI(){
+  document.getElementById("por-games").value = games;
+  document.getElementById("lan-games").value = games;
+}
+document.getElementById("por-games").addEventListener("input", numInput);
+document.getElementById("lan-games").addEventListener("input", numInput);
+["por-games","lan-games"].forEach(id=>{
+  document.getElementById(id).addEventListener("focus",e=>e.target.select());
+});
+document.getElementById("por-inc").onclick = ()=>{ games+=gStep; syncGamesUI(); renderGrids(); };
+document.getElementById("por-dec").onclick = ()=>{ games=Math.max(0,games-gStep); syncGamesUI(); renderGrids(); };
+document.getElementById("lan-inc").onclick = ()=>{ games+=gStep; syncGamesUI(); renderGrids(); };
+document.getElementById("lan-dec").onclick = ()=>{ games=Math.max(0,games-gStep); syncGamesUI(); renderGrids(); };
+
+// ---- ステップタブ ----
+function renderStepTabs(){
+  ["por-step-tabs","lan-step-tabs"].forEach(id=>{
+    const el = document.getElementById(id);
+    el.innerHTML="";
+    STEP_OPTS.forEach(s=>{
+      const b=document.createElement("button");
+      b.className="tab"+(gStep===s?" active":"");
+      b.textContent="×"+s;
+      b.style.color = gStep===s?"#f5a623":"#555";
+      b.style.background = gStep===s?"#f5a62344":"#0d0f14";
+      b.onclick=()=>{ gStep=s; renderStepTabs(); };
+      el.appendChild(b);
+    });
+  });
+}
+renderStepTabs();
+
+// ---- リセット ----
+document.getElementById("por-reset").onclick = ()=>{ counters.forEach(c=>c.count=0); games=0; syncGamesUI(); renderGrids(); };
+document.getElementById("lan-reset").onclick = ()=>{ counters.forEach(c=>c.count=0); games=0; syncGamesUI(); renderGrids(); };
+
+// ---- グリッド描画 ----
+function prob(c){ return games>0&&c.count>0?`1/${Math.round(games/c.count)}`:null; }
+
+function renderGrids(){
+  ["por-grid","lan-grid"].forEach(id=>renderGrid(id));
+}
+
+function renderGrid(gridId){
+  const grid = document.getElementById(gridId);
+  grid.innerHTML="";
+
+  counters.forEach(c=>{
+    const p = prob(c);
+    const card = document.createElement("div");
+    card.className="card";
+    card.style.border=`1px solid ${c.accent}33`;
+
+    // header
+    card.innerHTML=`
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-emoji">${c.emoji}</span>
+          <span class="card-label" style="color:${c.accent}">${c.label}</span>
+        </div>
+        <div class="card-right">
+          <span class="card-prob" style="color:${p?'#aaa':'transparent'}">${p||"1/—"}</span>
+          <button class="icon-btn edit-btn">✏️</button>
+          <button class="icon-btn del-btn">🗑️</button>
+        </div>
+      </div>
+      <input class="count-input" style="border:1px solid ${c.accent}44;color:${c.accent}" inputmode="numeric" pattern="[0-9]*" value="${c.count}">
+      <div class="card-btns">
+        <button class="btn-dec">－</button>
+        <button class="btn-inc" style="background:${c.accent}22;border:1px solid ${c.accent}66;color:${c.accent}">＋</button>
+        <button class="btn-rst">RST</button>
+      </div>
+    `;
+
+    // step tabs
+    const tabsDiv = document.createElement("div");
+    tabsDiv.className="tabs";
+    tabsDiv.style.border=`1px solid ${c.accent}33`;
+    STEP_OPTS.forEach(s=>{
+      const b=document.createElement("button");
+      b.className="tab"+(c.step===s?" active":"");
+      b.textContent="×"+s;
+      b.style.color=c.step===s?c.accent:"#555";
+      b.style.background=c.step===s?c.accent+"44":"#0d0f14";
+      b.onclick=()=>{ c.step=s; renderGrids(); };
+      tabsDiv.appendChild(b);
+    });
+    card.appendChild(tabsDiv);
+
+    // events
+    card.querySelector(".edit-btn").onclick=()=>openEdit(c);
+    card.querySelector(".del-btn").onclick=()=>{ counters=counters.filter(x=>x.id!==c.id); renderGrids(); };
+    card.querySelector(".btn-dec").onclick=()=>{ c.count=Math.max(0,c.count-c.step); renderGrids(); };
+    card.querySelector(".btn-inc").onclick=()=>{ c.count+=c.step; renderGrids(); };
+    card.querySelector(".btn-rst").onclick=()=>{ c.count=0; renderGrids(); };
+    const inp=card.querySelector(".count-input");
+    inp.addEventListener("input",e=>{
+      const v=e.target.value.replace(/[^0-9]/g,"");
+      c.count=v===""?0:parseInt(v,10);
+      // probだけその場で更新（DOMを再生成しない）
+      const probEl=card.querySelector(".card-prob");
+      const p=prob(c);
+      probEl.textContent=p||"1/—";
+      probEl.style.color=p?"#aaa":"transparent";
+    });
+    inp.addEventListener("blur",e=>{
+      // フォーカスが外れたときだけ全体再描画
+      renderGrids();
+    });
+    inp.addEventListener("focus",e=>e.target.select());
+
+    grid.appendChild(card);
+  });
+
+  // 追加ボタン
+  if(counters.length<8){
+    const btn=document.createElement("button");
+    btn.className="btn-add";
+    btn.innerHTML='<span>＋</span><span class="small">追加</span>';
+    btn.onclick=openNew;
+    grid.appendChild(btn);
+  }
+}
+
+// ---- モーダル ----
+function buildPresets(currentEmoji){
+  const area=document.getElementById("preset-area");
+  area.innerHTML="";
+  PRESET_GROUPS.forEach(g=>{
+    const div=document.createElement("div");
+    div.className="preset-group";
+    div.innerHTML=`<div class="preset-group-label">${g.label}</div>`;
+    const row=document.createElement("div");
+    row.className="preset-emojis";
+    g.emojis.forEach(em=>{
+      const b=document.createElement("button");
+      b.className="preset-btn"+(document.getElementById("modal-emoji-input").value===em?" sel":"");
+      b.textContent=em;
+      b.onclick=()=>{
+        document.getElementById("modal-emoji-input").value=em;
+        document.getElementById("modal-emoji-preview").textContent=em;
+        buildPresets(em);
+      };
+      row.appendChild(b);
+    });
+    div.appendChild(row);
+    area.appendChild(div);
+  });
+}
+
+document.getElementById("modal-emoji-input").addEventListener("input",e=>{
+  document.getElementById("modal-emoji-preview").textContent=e.target.value||"？";
+  buildPresets(e.target.value);
+});
+
+function openModal(){
+  buildPresets(document.getElementById("modal-emoji-input").value);
+  document.getElementById("modal").classList.add("open");
+}
+function closeModal(){ document.getElementById("modal").classList.remove("open"); modalTarget=null; }
+
+function openNew(){
+  modalTarget="new";
+  document.getElementById("modal-title").textContent="項目を追加";
+  document.getElementById("modal-emoji-input").value="⭐";
+  document.getElementById("modal-emoji-preview").textContent="⭐";
+  document.getElementById("modal-label-input").value="";
+  openModal();
+}
+function openEdit(c){
+  modalTarget=c.id;
+  document.getElementById("modal-title").textContent="編集";
+  document.getElementById("modal-emoji-input").value=c.emoji;
+  document.getElementById("modal-emoji-preview").textContent=c.emoji;
+  document.getElementById("modal-label-input").value=c.label;
+  openModal();
+}
+
+document.getElementById("modal").addEventListener("click",e=>{ if(e.target===e.currentTarget) closeModal(); });
+document.getElementById("modal-cancel").onclick=closeModal;
+document.getElementById("modal-label-input").addEventListener("keydown",e=>{ if(e.key==="Enter") doSave(); });
+
+function doSave(){
+  const emoji=document.getElementById("modal-emoji-input").value||"⭐";
+  const label=document.getElementById("modal-label-input").value||"新項目";
+  if(modalTarget==="new"){
+    const id=uid++;
+    const accent=ACCENTS[counters.length%ACCENTS.length];
+    counters.push({id,emoji,label,count:0,step:1,accent});
+  } else {
+    const c=counters.find(x=>x.id===modalTarget);
+    if(c){ c.emoji=emoji; c.label=label; }
+  }
+  closeModal();
+  renderGrids();
+}
+document.getElementById("modal-save").onclick=doSave;
+
+
+// ---- 背景設定 ----
+const COLOR_PRESETS = ["#111318","#0a0a0f","#1a0a2e","#0f1a0a","#1a0f0a","#0a1a1a","#1a1a0a","#0d0d0d"];
+let bgImageData = null;
+let overlayOpacity = 0.5;
+let pendingImageData = null;
+let pendingColor = null;
+
+function applyBg(){
+  if(bgImageData){
+    document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,${overlayOpacity}),rgba(0,0,0,${overlayOpacity})),url(${bgImageData})`;
+    document.body.style.backgroundColor = "";
+  }
+}
+
+function openBgModal(){
+  pendingImageData = bgImageData;
+  pendingColor = null;
+  updatePreview();
+  document.getElementById("bg-modal").style.display="flex";
+}
+function closeBgModal(){ document.getElementById("bg-modal").style.display="none"; }
+
+function updatePreview(){
+  const prev = document.getElementById("bg-preview");
+  const ov = parseInt(document.getElementById("overlay-slider").value)/100;
+  if(pendingImageData){
+    prev.style.backgroundImage=`linear-gradient(rgba(0,0,0,${ov}),rgba(0,0,0,${ov})),url(${pendingImageData})`;
+    prev.textContent="";
+  } else if(pendingColor){
+    prev.style.backgroundImage="none";
+    prev.style.backgroundColor=pendingColor;
+    prev.textContent="";
+  } else {
+    prev.style.backgroundImage="none";
+    prev.style.backgroundColor="#0d0f14";
+    prev.textContent="プレビュー";
+  }
+}
+
+// カラープリセット
+const cpEl = document.getElementById("color-presets");
+COLOR_PRESETS.forEach(col=>{
+  const b=document.createElement("button");
+  b.style.cssText=`width:32px;height:32px;border-radius:6px;background:${col};border:1px solid #444;cursor:pointer;flex-shrink:0`;
+  b.onclick=()=>{ pendingColor=col; pendingImageData=null; updatePreview(); };
+  cpEl.appendChild(b);
+});
+
+// ファイル選択
+document.getElementById("bg-file").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ pendingImageData=ev.target.result; pendingColor=null; updatePreview(); };
+  reader.readAsDataURL(file);
+});
+
+// スライダー
+document.getElementById("overlay-slider").addEventListener("input",e=>{
+  document.getElementById("overlay-val").textContent=e.target.value;
+  updatePreview();
+});
+
+document.getElementById("bg-cancel").onclick=closeBgModal;
+document.getElementById("bg-modal").addEventListener("click",e=>{ if(e.target===e.currentTarget) closeBgModal(); });
+
+document.getElementById("bg-clear").onclick=()=>{
+  pendingImageData=null; pendingColor=null;
+  bgImageData=null;
+  document.body.style.backgroundImage="none";
+  document.body.style.backgroundColor="#111318";
+  updatePreview();
+};
+
+document.getElementById("bg-save").onclick=()=>{
+  const ov=parseInt(document.getElementById("overlay-slider").value)/100;
+  overlayOpacity=ov;
+  if(pendingImageData){ bgImageData=pendingImageData; applyBg(); }
+  else if(pendingColor){
+    bgImageData=null;
+    document.body.style.backgroundImage="none";
+    document.body.style.backgroundColor=pendingColor;
+  }
+  closeBgModal();
+};
+
+["por-bg-btn","lan-bg-btn"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.onclick=openBgModal;
+});
+
+// 初期描画
+renderGrids();
+</script>
+</body>
+</html>
