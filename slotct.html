@@ -82,7 +82,7 @@
 <!-- 縦向き -->
 <div id="app-por">
   <div class="game-panel">
-    <div class="game-label">① ゲーム数</div>
+    <div class="game-label">🎰 ゲーム数</div>
     <div class="game-row">
       <button class="tab" id="por-dec" style="flex:0;padding:5px 9px;border-radius:7px;font-size:16px;font-weight:900;background:#88888818;border:1px solid #88888844;color:#888">－</button>
       <input class="game-input" id="por-games" inputmode="numeric" pattern="[0-9]*" value="0">
@@ -94,8 +94,8 @@
     <div class="counter-grid" id="por-grid"></div>
   </div>
   <div style="display:flex;gap:6px">
-    <button class="reset-btn" id="por-reset" style="flex:1">全リセット</button>
-    <button class="reset-btn" id="por-bg-btn" style="flex:0;padding:6px 10px;white-space:nowrap">🖼️ 背景</button>
+    <button id="por-reset" style="flex:1;padding:6px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:8px;color:#f87171;font-size:11px;cursor:pointer">全リセット</button>
+    <button id="por-bg-btn" style="flex:0;padding:6px 12px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:8px;color:#60a5fa;font-size:13px;cursor:pointer;white-space:nowrap">🖼️</button>
   </div>
 </div>
 
@@ -103,7 +103,7 @@
 <div id="app-lan">
   <div class="side-panel">
     <div class="game-panel-lan">
-      <div class="game-label">① ゲーム数</div>
+      <div class="game-label">🎰 ゲーム数</div>
       <input class="game-input-lan" id="lan-games" inputmode="numeric" pattern="[0-9]*" value="0">
       <div class="game-btns-lan">
         <button id="lan-dec" style="flex:1;padding:7px 0;background:#88888818;border:1px solid #88888844;border-radius:7px;color:#888;font-size:18px;font-weight:900">－</button>
@@ -111,8 +111,8 @@
       </div>
       <div class="tabs" id="lan-step-tabs" style="border:1px solid #f5a62333"></div>
     </div>
-    <button class="reset-btn" id="lan-reset">全リセット</button>
-    <button class="reset-btn" id="lan-bg-btn" style="padding:6px 10px">🖼️ 背景</button>
+    <button id="lan-reset" style="width:100%;padding:6px;background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.3);border-radius:8px;color:#f87171;font-size:11px;cursor:pointer">全リセット</button>
+    <button id="lan-bg-btn" style="width:100%;padding:6px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.3);border-radius:8px;color:#60a5fa;font-size:13px;cursor:pointer">🖼️ 背景</button>
   </div>
   <div class="counter-scroll">
     <div class="counter-grid" id="lan-grid"></div>
