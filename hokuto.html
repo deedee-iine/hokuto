@@ -217,7 +217,30 @@ body::before{
 .td-val.gold-v{color:var(--gold-light);}
 .td-val.normal{color:var(--text);}
 
-footer{text-align:center;padding:10px;font-size:9px;color:var(--text-dim);letter-spacing:1px;}
+/* ===== DIGIT SEG ===== */
+.digit-seg{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:3px;}
+.seg-btn{
+  padding:5px 2px;font-size:11px;font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  background:rgba(40,30,15,.6);
+  border:1px solid var(--border);
+  border-radius:6px;color:var(--text-dim);
+  cursor:pointer;transition:all .15s;
+}
+.seg-btn.active{
+  background:rgba(201,162,39,.25);
+  border-color:var(--gold);
+  color:var(--gold-light);
+}
+.digit-pm{
+  padding:7px;font-size:16px;font-weight:900;
+  font-family:'Noto Sans JP',sans-serif;
+  background:rgba(201,162,39,.15);
+  border:1px solid rgba(201,162,39,.35);
+  border-radius:8px;color:var(--gold-light);
+  cursor:pointer;transition:all .15s;
+}
+.digit-pm:active{background:var(--gold);color:#000;}
 
 /* ===== TABS ===== */
 .tab-bar{
@@ -288,18 +311,30 @@ footer{text-align:center;padding:10px;font-size:9px;color:var(--text-dim);letter
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <div class="field">
             <label>総ゲーム数</label>
-            <div style="display:flex;align-items:center;gap:4px;">
-              <button class="cnt-btn" id="btn-g-total_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
-              <input type="number" id="total-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
-              <button class="cnt-btn" id="btn-g-total_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+            <input type="number" id="total-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="width:100%;margin-bottom:6px;">
+            <div class="digit-seg" id="seg-tg">
+              <button class="seg-btn active" data-val="1000">1000</button>
+              <button class="seg-btn" data-val="100">100</button>
+              <button class="seg-btn" data-val="10">10</button>
+              <button class="seg-btn" data-val="1">1</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+              <button class="digit-pm" id="btn-tg-dec">－</button>
+              <button class="digit-pm" id="btn-tg-inc">＋</button>
             </div>
           </div>
           <div class="field">
             <label>通常ゲーム数</label>
-            <div style="display:flex;align-items:center;gap:4px;">
-              <button class="cnt-btn" id="btn-g-normal_g-dec" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">−</button>
-              <input type="number" id="normal-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="flex:1;min-width:0;">
-              <button class="cnt-btn" id="btn-g-normal_g-inc" oncontextmenu="return false" style="width:26px;height:26px;font-size:14px;padding:0;">＋</button>
+            <input type="number" id="normal-g" placeholder="0" min="0" inputmode="numeric" onfocus="this.select()" style="width:100%;margin-bottom:6px;">
+            <div class="digit-seg" id="seg-ng">
+              <button class="seg-btn active" data-val="1000">1000</button>
+              <button class="seg-btn" data-val="100">100</button>
+              <button class="seg-btn" data-val="10">10</button>
+              <button class="seg-btn" data-val="1">1</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;">
+              <button class="digit-pm" id="btn-ng-dec">－</button>
+              <button class="digit-pm" id="btn-ng-inc">＋</button>
             </div>
           </div>
         </div>
@@ -689,10 +724,10 @@ function compute(){
   let scores={};
   SETTINGS.forEach(s=>scores[s]=1.0);
 
-  // 【初当たり合算】信頼度高め・サンプル数で精度調整
+  // 【初当たり合算】通常G数が増えるほど信頼度アップ
   if(ng>0&&totalFH>0){
     const a=totalFH/ng;
-    const spread=totalFH>=15?0.18:totalFH>=8?0.24:totalFH>=4?0.30:0.40;
+    const spread=ng>=5000?0.12:ng>=4000?0.15:ng>=3000?0.18:ng>=2000?0.22:ng>=1000?0.30:0.40;
     SETTINGS.forEach(s=>scores[s]*=lh(a,FIRST_HIT_RATE[s],spread));
   }
 
@@ -948,13 +983,13 @@ function renderDerivedStats(ng,tg,totalFH){
           <span style="font-size:10px;color:var(--text-dim);">特定役</span>
           <span style="font-size:11px;font-weight:900;color:${tokCnt>=1?'var(--gold-light)':'var(--text)'};">${tokCnt}回 ${tokRate?'1/'+tokRate:''}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
-          <span style="font-size:10px;color:var(--text-dim);">弱🍉/強🍉</span>
-          <span style="font-size:11px;font-weight:900;color:var(--text);">${wsCnt}/${ssCnt}</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;overflow:hidden;">
+          <span style="font-size:10px;color:var(--text-dim);flex-shrink:0;">🍉</span>
+          <span style="font-size:10px;font-weight:900;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-left:4px;">弱${wsCnt}回${wsRate?' 1/'+wsRate:''} / 強${ssCnt}回${ssRate?' 1/'+ssRate:''}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 7px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:3px 5px;">
           <span style="font-size:10px;color:var(--text-dim);">強🍒</span>
-          <span style="font-size:11px;font-weight:900;color:var(--text);">${scCnt}回 ${scRate?'1/'+scRate:''}</span>
+          <span style="font-size:11px;font-weight:900;color:var(--text);">${scCnt}回${scRate?' 1/'+scRate:''}</span>
         </div>
       </div>
     </td></tr>
@@ -1039,10 +1074,24 @@ bindTapAndLongPress(document.getElementById('btn-dec-tenkou_start'), ()=>dec('te
 
 
 
-bindTapAndLongPress(document.getElementById('btn-g-total_g-inc'),  ()=>changeG('total_g', 1), ()=>changeG('total_g', 10));
-bindTapAndLongPress(document.getElementById('btn-g-total_g-dec'),  ()=>changeG('total_g', -1), ()=>changeG('total_g', -10));
-bindTapAndLongPress(document.getElementById('btn-g-normal_g-inc'), ()=>changeG('normal_g', 1), ()=>changeG('normal_g', 10));
-bindTapAndLongPress(document.getElementById('btn-g-normal_g-dec'), ()=>changeG('normal_g', -1), ()=>changeG('normal_g', -10));
+// ゲーム数 セグメント選択 + ＋/－
+let tgStep=1000, ngStep=1000;
+document.getElementById('seg-tg').addEventListener('click',e=>{
+  if(!e.target.classList.contains('seg-btn'))return;
+  document.querySelectorAll('#seg-tg .seg-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  tgStep=parseInt(e.target.dataset.val);
+});
+document.getElementById('seg-ng').addEventListener('click',e=>{
+  if(!e.target.classList.contains('seg-btn'))return;
+  document.querySelectorAll('#seg-ng .seg-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  ngStep=parseInt(e.target.dataset.val);
+});
+bindTapAndLongPress(document.getElementById('btn-tg-inc'), ()=>changeG('total_g', tgStep),  ()=>changeG('total_g', tgStep));
+bindTapAndLongPress(document.getElementById('btn-tg-dec'), ()=>changeG('total_g', -tgStep), ()=>changeG('total_g', -tgStep));
+bindTapAndLongPress(document.getElementById('btn-ng-inc'), ()=>changeG('normal_g', ngStep),  ()=>changeG('normal_g', ngStep));
+bindTapAndLongPress(document.getElementById('btn-ng-dec'), ()=>changeG('normal_g', -ngStep), ()=>changeG('normal_g', -ngStep));
 loadState();
 applyStateToUI();
 compute();
