@@ -50,7 +50,7 @@
   .card-emoji{font-size:15px}
   .card-label{font-size:11px;font-weight:700;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .card-right{display:flex;gap:2px;align-items:center}
-  .card-prob{font-size:13px;font-weight:700;min-width:44px;text-align:right;color:#aaa}
+  .card-prob{font-size:12px;font-weight:700;min-width:52px;text-align:right;color:#aaa}
   .icon-btn{background:none;border:none;color:#444;font-size:11px;padding:1px 2px}
   .count-input{width:100%;background:#0d0f14;border-radius:8px;font-size:26px;font-weight:900;text-align:center;padding:2px 0;color:inherit}
   .card-btns{display:flex;gap:4px}
@@ -184,7 +184,7 @@ const PRESET_GROUPS = [
   { label:"フルーツ",    emojis:["🍒","🍉","🍋","🍇","🍊","🍎","🍓","🍑","🥝"] },
   { label:"その他",      emojis:["🔔","🌈","⭐","💎","🎰","⚡","🎯","💰","🃏","🎲"] },
 ];
-const STEP_OPTS = [1,10,100];
+const STEP_OPTS = [1,10,100,1000];
 
 let uid = 20;
 let games = 0;
@@ -241,7 +241,7 @@ document.getElementById("por-reset").onclick = ()=>{ counters.forEach(c=>c.count
 document.getElementById("lan-reset").onclick = ()=>{ counters.forEach(c=>c.count=0); games=0; syncGamesUI(); renderGrids(); };
 
 // ---- グリッド描画 ----
-function prob(c){ return games>0&&c.count>0?`1/${Math.round(games/c.count)}`:null; }
+function prob(c){ return games>0&&c.count>0?`1/${(games/c.count).toFixed(2)}`:null; }
 
 function renderGrids(){
   ["por-grid","lan-grid"].forEach(id=>renderGrid(id));
