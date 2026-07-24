@@ -878,12 +878,14 @@
     <div class="btn-row">
       <span class="speed-label">設定:</span>
       <select id="settingSelect" class="force-select">
+        <option value="7">L</option>
         <option value="1">①</option>
         <option value="2">②</option>
         <option value="3" selected>③</option>
         <option value="4">④</option>
         <option value="5">⑤</option>
         <option value="6">⑥</option>
+        <option value="8">D</option>
       </select>
       <span class="speed-label">カット:</span>
       <div class="speed-seg">
@@ -910,8 +912,10 @@
           <option value="role:replay">リプレイ強制</option>
           <option value="role:watermelon">スイカ強制</option>
           <option value="role:cherry">チェリー強制</option>
-          <option value="role:bb">BB強制</option>
-          <option value="role:rb">RB強制</option>
+          <option value="role:bb_rt">BB強制(RTあり)</option>
+          <option value="role:bb_norit">BB強制(RTなし)</option>
+          <option value="role:rb_rt">RB強制(RTあり)</option>
+          <option value="role:rb_norit">RB強制(RTなし)</option>
           <option value="role:miss">ハズレ強制</option>
         </optgroup>
         <optgroup label="モード(即切替)">
@@ -1034,18 +1038,32 @@
     </table>
     <p class="manual-p">BB/RB確率は<b>モード</b>と<b>設定</b>で変動します。当選すると<b>1枚賭けのボーナスゲーム</b>に突入し、毎ゲーム中段🔔確定で15枚獲得(BB20G/RB7G、差引実質BB280枚・RB98枚相当)。🍒解除・🍉当選時は<b>次のゲームで</b>BB/RBが確定発動します。</p>
 
-    <div class="table-title">④ モードシステム(設定①/⑥基準)</div>
+    <div class="table-title">④ 前兆RT</div>
+    <p class="manual-p">BB/RBに当選しても、即座に揃わず<b>5〜32G(均等振り分け)の前兆RT</b>に突入することがあります。RT中はリプレイ確率が<b>1/3</b>にアップし、ベル・スイカ・チェリーも通常通り出現します(スイカ・チェリーは解除に成功すると前兆を待たずにそのまま確定発動)。RT消化完了後に当たりが確定発動し、花が点滅します。</p>
     <table class="paytable">
-      <thead><tr><th>モード</th><th>BB①</th><th>BB⑥</th><th>RB①</th><th>RB⑥</th></tr></thead>
+      <thead><tr><th>モード</th><th>前兆RT突入率</th></tr></thead>
       <tbody>
-        <tr><td class="name"><span class="mode-chip chip-normal">通常</span></td><td>1/380</td><td class="hi-cell">1/260</td><td>1/450</td><td class="hi-cell">1/260</td></tr>
-        <tr><td class="name"><span class="mode-chip chip-chance">✨チャンス</span></td><td colspan="2">1/200(共通)</td><td colspan="2">1/300(共通)</td></tr>
-        <tr><td class="name"><span class="mode-chip chip-hamari">❄️ハマり</span></td><td colspan="2">1/1000(共通)</td><td colspan="2">1/2000(共通)</td></tr>
-        <tr><td class="name"><span class="mode-chip chip-renchan">🔥連チャン</span></td><td colspan="2">1/30(共通)</td><td colspan="2">1/30(共通)</td></tr>
-        <tr><td class="name"><span class="mode-chip chip-bakuren">💥爆連</span></td><td colspan="2">1/5(共通)</td><td colspan="2">1/5(共通)</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-normal">通常</span></td><td>20%</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-chance">✨チャンス</span></td><td>20%</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-hamari">❄️ハマり</span></td><td>60%</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-renchan">🔥連チャン</span></td><td>なし(即当選)</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-bakuren">💥爆連</span></td><td>なし(即当選)</td></tr>
       </tbody>
     </table>
-    <div class="hist-note">差がつくのは<b>通常モードのBB/RB確率のみ</b>。<b>通常モードはBB・RBが常に同確率</b>です。チャンス以下は全設定共通です。</div>
+    <div class="hist-note">前兆RT中、1/16の確率で花が一瞬(0.05秒)点灯するヒントがあります(画面上に前兆中である表示は一切ありません)。ただし前兆が<b>5G</b>で選ばれた場合のみ<b>毎ゲーム必ず</b>一瞬点灯します。頻発するようなら短い前兆の期待大です。</div>
+
+    <div class="table-title">⑤ モードシステム(設定①/⑥基準)</div>
+    <table class="paytable">
+      <thead><tr><th>モード</th><th>BB①</th><th>BB⑥</th><th>RB①</th><th>RB⑥</th><th>合算①</th><th>合算⑥</th></tr></thead>
+      <tbody>
+        <tr><td class="name"><span class="mode-chip chip-normal">通常</span></td><td>1/380</td><td class="hi-cell">1/260</td><td>1/450</td><td class="hi-cell">1/260</td><td>1/206.0</td><td class="hi-cell">1/130.0</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-chance">✨チャンス</span></td><td colspan="2">1/200(共通)</td><td colspan="2">1/300(共通)</td><td colspan="2">1/120.0(共通)</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-hamari">❄️ハマり</span></td><td colspan="2">1/1000(共通)</td><td colspan="2">1/2000(共通)</td><td colspan="2">1/666.7(共通)</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-renchan">🔥連チャン</span></td><td colspan="2">1/30(共通)</td><td colspan="2">1/30(共通)</td><td colspan="2">1/15.0(共通)</td></tr>
+        <tr><td class="name"><span class="mode-chip chip-bakuren">💥爆連</span></td><td colspan="2">1/5(共通)</td><td colspan="2">1/5(共通)</td><td colspan="2">1/2.5(共通)</td></tr>
+      </tbody>
+    </table>
+    <div class="hist-note">差がつくのは<b>通常モードのBB/RB確率のみ</b>。<b>通常モードはBB・RBが常に同確率</b>です。チャンス以下は全設定共通です。「合算」はBB+RBを合わせた初当たり確率です。</div>
 
     <div class="table-title">通常モード移行率(詳細)</div>
     <table class="paytable">
@@ -1099,21 +1117,47 @@
     </table>
     <div class="hist-note">BB・RBとも同じ移行率を使用します(特殊ルールはありません)。通常モードは0.5%〜1%、ハマりモードは1%〜3%で爆連モードへ直行するルートがあります(設定により異なります)。ハマりは連チャン以外へ移行せず、連チャンから爆連への直接移行もありません(爆連到達は🍉当選かチェリー重複当選のみ)。</div>
 
-    <div class="table-title">⑤ 設定差(設定1〜6)</div>
+    <div id="hiddenSettingManualSectionL" style="display:none;">
+      <div class="table-title">⑤ 裏設定L(非公開)</div>
+      <table class="paytable">
+        <thead><tr><th>モード</th><th>ループ</th><th>移行先</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mode-chip chip-hamari">❄️ハマり</span></td><td>65%</td><td>連チャン30% / 爆連5%</td></tr>
+          <tr><td><span class="mode-chip chip-renchan">🔥連チャン</span></td><td>72%</td><td>ハマり28%</td></tr>
+          <tr><td><span class="mode-chip chip-bakuren">💥爆連</span></td><td>90%</td><td>連チャン10%</td></tr>
+        </tbody>
+      </table>
+      <div class="hist-note">設定Lはハマり⇔連チャン⇔爆連のみを永久ループする特殊設定です。通常・チャンスへは一切移行しません。開始モードはハマり固定、🍒解除なし、背景は常に夜。<b>シミュレーション出率(17500G・前兆RT込み):約75.6%</b>(ハマり滞在率が高いため公開設定①より低め)</div>
+    </div>
+
+    <div id="hiddenSettingManualSectionD" style="display:none;">
+      <div class="table-title">⑤ 裏設定D(非公開)</div>
+      <table class="paytable">
+        <thead><tr><th>モード</th><th>ループ</th><th>移行先</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mode-chip chip-hamari">❄️ハマり</span></td><td>34%</td><td>連チャン33% / 爆連33%</td></tr>
+          <tr><td><span class="mode-chip chip-renchan">🔥連チャン</span></td><td>72%</td><td>ハマり28%</td></tr>
+          <tr><td><span class="mode-chip chip-bakuren">💥爆連</span></td><td>90%</td><td>連チャン5% / ハマり5%</td></tr>
+        </tbody>
+      </table>
+      <div class="hist-note">設定Dはハマり⇔連チャン⇔爆連のみを永久ループする特殊設定です。通常・チャンスへは一切移行しません。開始モードはハマり固定、🍒解除率25%、背景は常に夜。<b>シミュレーション出率(17500G・前兆RT込み):約154.5%</b>(公開設定⑥をさらに上回る最上位設定)</div>
+    </div>
+
+    <div class="table-title">⑥ 設定差(設定1〜6)</div>
     <table class="paytable">
       <thead><tr><th>設定</th><th>通常BB</th><th>通常RB</th><th>17500G理論出率</th></tr></thead>
       <tbody>
-        <tr><td>①</td><td>1/380</td><td>1/450</td><td class="hi-cell">88.6%</td></tr>
-        <tr><td>②</td><td>1/340</td><td>1/360</td><td class="hi-cell">93.2%</td></tr>
-        <tr><td>③</td><td>1/300</td><td>1/330</td><td class="hi-cell">97.8%</td></tr>
-        <tr><td>④</td><td>1/300</td><td>1/300</td><td class="hi-cell">108.2%</td></tr>
-        <tr><td>⑤</td><td>1/280</td><td>1/280</td><td class="hi-cell">118.4%</td></tr>
-        <tr><td>⑥</td><td>1/260</td><td>1/260</td><td class="hi-cell">137.5%</td></tr>
+        <tr><td>①</td><td>1/380</td><td>1/450</td><td class="hi-cell">86.4%</td></tr>
+        <tr><td>②</td><td>1/340</td><td>1/360</td><td class="hi-cell">92.2%</td></tr>
+        <tr><td>③</td><td>1/300</td><td>1/330</td><td class="hi-cell">97.4%</td></tr>
+        <tr><td>④</td><td>1/300</td><td>1/300</td><td class="hi-cell">108.6%</td></tr>
+        <tr><td>⑤</td><td>1/280</td><td>1/280</td><td class="hi-cell">120.0%</td></tr>
+        <tr><td>⑥</td><td>1/260</td><td>1/260</td><td class="hi-cell">135.3%</td></tr>
       </tbody>
     </table>
     <div class="hist-note">設定を切り替えると集計データはリセットされます。チャンス・ハマりが「通常へ戻らない」構成になったため出率は全体的に高めです(大規模シミュレーションによる実測値)。</div>
 
-    <div class="table-title">⑥ 操作方法</div>
+    <div class="table-title">⑦ 操作方法</div>
     <ul class="manual-list">
       <li><b>1回転</b>:レバー演出つきで1回転 / <b>オート</b>:連続回転(通常・高速・最速)</li>
       <li><b>+100・+1000・+10000</b>:指定回転数を一括消化(検証向け)</li>
@@ -1294,6 +1338,49 @@
       // きらめきを添える高音のトリル
       [1568.0, 2093.0].forEach((f,i)=> tone(f, 0.15, 'sine', 0.05, notes.length*0.09 + i*0.06));
     }
+    // スイカ揃い用のホーン(勝利のエアホーン風、2音の力強いブラスト)
+    let noiseBuffer = null;
+    function getNoiseBuffer(c){
+      if(noiseBuffer) return noiseBuffer;
+      const len = c.sampleRate * 2; // 2 seconds of noise, looped/reused as needed
+      const buf = c.createBuffer(1, len, c.sampleRate);
+      const data = buf.getChannelData(0);
+      for(let i=0;i<len;i++){
+        data[i] = Math.random()*2 - 1;
+      }
+      noiseBuffer = buf;
+      return noiseBuffer;
+    }
+    // スイカ揃い用: 波が寄せて返すような音(フィルターをかけたノイズ)
+    function horn(){
+      if(muted) return;
+      const c = getCtx();
+      if(!c) return;
+      const t0 = c.currentTime;
+      const src = c.createBufferSource();
+      src.buffer = getNoiseBuffer(c);
+      src.loop = true;
+
+      const filter = c.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 0.7;
+      filter.frequency.setValueAtTime(300, t0);
+      filter.frequency.linearRampToValueAtTime(1400, t0 + 0.55);   // 波が寄せる(高くなる)
+      filter.frequency.linearRampToValueAtTime(2200, t0 + 0.75);   // 崩れる瞬間、少し鋭く
+      filter.frequency.linearRampToValueAtTime(500, t0 + 1.5);     // 引いていく
+
+      const gain = c.createGain();
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.linearRampToValueAtTime(0.35, t0 + 0.65);   // 寄せる
+      gain.gain.linearRampToValueAtTime(0.5, t0 + 0.8);     // 崩れるピーク
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.7); // 引いて消える
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(c.destination);
+      src.start(t0);
+      src.stop(t0 + 1.8);
+    }
     function setMuted(v){ muted = v; }
     function isMuted(){ return muted; }
 
@@ -1388,7 +1475,7 @@
     function getWatermelonFinalKyuinDelayMs(totalDurationMs){
       return computeStutterTiming(totalDurationMs).finalStartMs;
     }
-    return { bet, spinStart, reelStop, win, bonus, setMuted, isMuted, startBGM, stopBGM, flowerBlink, watermelonFreezeStutter, getWatermelonFinalKyuinDelayMs, loadKyuinBuffer };
+    return { bet, spinStart, reelStop, win, bonus, horn, setMuted, isMuted, startBGM, stopBGM, flowerBlink, watermelonFreezeStutter, getWatermelonFinalKyuinDelayMs, loadKyuinBuffer };
   })();
 
   // symbol visuals
@@ -1428,8 +1515,8 @@ const SYM_IMG = {
   };
   // 設定1〜6: chance/hamari/renchan/bakuren の BB/RB確率は全設定共通で固定。
   // 差がつくのは (a) 通常モードのBB/RB確率 と (b) モード移行抽選のみ(実機に近い方式)。
-  // 各設定は17500G理論出率が目標値(95/97/100/103/108/112%)になるようシミュレーションで較正済み。
-  const SETTING_TARGET_RTP = [88.6, 93.2, 97.8, 108.2, 118.4, 137.5];
+  // 各設定は17500G理論出率が目標値(前兆RT込みシミュレーション: 約86/92/97/109/120/135%)になるよう較正済み。
+  const SETTING_TARGET_RTP = [88.6, 93.2, 97.8, 108.2, 118.4, 137.5, 999, 999]; // 7=裏設定L, 8=裏設定D(非公開)
   const SETTING_NORMAL_PROB = [
     { bb:1/380, rb:1/450 }, // 設定1
     { bb:1/340, rb:1/360 }, // 設定2
@@ -1437,6 +1524,8 @@ const SYM_IMG = {
     { bb:1/300, rb:1/300 }, // 設定4
     { bb:1/280, rb:1/280 }, // 設定5
     { bb:1/260, rb:1/260 }, // 設定6
+    { bb:1/260, rb:1/260 }, // 設定L(裏)
+    { bb:1/260, rb:1/260 }, // 設定D(裏)
   ];
   const FIXED_MODE_PROB = {
     chance:  { bb:1/200, rb:1/300 },
@@ -1495,6 +1584,20 @@ const SYM_IMG = {
       renchan: { renchan:0.50, normal:0.40, chance:0.10 },
       bakuren: { bakuren:0.90, normal:0.10 },
     },
+    { // 設定L (裏モード・非公開): ハマり⇔連チャン⇔爆連の完全ループ、通常・チャンスへは一切抜けない
+      normal:  { normal:0.495, chance:0.40, hamari:0.05, renchan:0.05, bakuren:0.005 },
+      chance:  { chance:0.30, renchan:0.70 },
+      hamari:  { hamari:0.65, renchan:0.30, bakuren:0.05 },
+      renchan: { renchan:0.72, hamari:0.28 },
+      bakuren: { bakuren:0.90, renchan:0.10 },
+    },
+    { // 設定D (裏モード・非公開): ハマり⇔連チャン⇔爆連の完全ループ、通常・チャンスへは一切抜けない
+      normal:  { normal:0.495, chance:0.40, hamari:0.05, renchan:0.05, bakuren:0.005 },
+      chance:  { chance:0.30, renchan:0.70 },
+      hamari:  { renchan:0.33, bakuren:0.33, hamari:0.34 },
+      renchan: { renchan:0.72, hamari:0.28 },
+      bakuren: { bakuren:0.90, renchan:0.05, hamari:0.05 },
+    },
   ];
   function currentTransitions(){
     return SETTING_TRANSITIONS[state.setting - 1];
@@ -1545,6 +1648,11 @@ const SYM_IMG = {
     watermelonBgSpinsLeft:0,
     suppressNight:false,
     currentBonusIsFromWatermelon:false,
+    zenchoRTGamesLeft:0,
+    zenchoPendingBonus:null,
+    forceRT:null,
+    zenchoFlashPending:false,
+    zenchoIsMinRT:false,
     graphNet:[],
     history:[],
   };
@@ -1556,7 +1664,7 @@ const SYM_IMG = {
       counts:{bell:0, replay:0, watermelon:0, cherry:0},
       totalIn:0, totalOut:0,
       replayCredit:0,
-      mode:'normal',
+      mode: (keepSetting === 7 || keepSetting === 8) ? 'hamari' : 'normal',
       setting:keepSetting,
       modeSelectCounts:{normal:0, chance:0, hamari:0, renchan:0, bakuren:0},
       forceFlag:null,
@@ -1567,6 +1675,11 @@ const SYM_IMG = {
       watermelonBgSpinsLeft:0,
       suppressNight:false,
       currentBonusIsFromWatermelon:false,
+      zenchoRTGamesLeft:0,
+      zenchoPendingBonus:null,
+      forceRT:null,
+      zenchoFlashPending:false,
+      zenchoIsMinRT:false,
       graphNet:[{x:0,y:0}],
       history:[],
     };
@@ -1602,8 +1715,13 @@ const SYM_IMG = {
     const forceSelect = document.getElementById('forceCombinedSelect');
     if(forceSelect) forceSelect.value = 'none';
     if(flag === 'miss') return null;
+    let key = flag;
+    if(flag === 'bb_rt'){ key = 'bb'; state.forceRT = true; }
+    else if(flag === 'bb_norit'){ key = 'bb'; state.forceRT = false; }
+    else if(flag === 'rb_rt'){ key = 'rb'; state.forceRT = true; }
+    else if(flag === 'rb_norit'){ key = 'rb'; state.forceRT = false; }
     const outcomes = buildOutcomes(state.mode);
-    return outcomes.find(o => o.key === flag) || null;
+    return outcomes.find(o => o.key === key) || null;
   }
 
   function randomDecorReels(forceLeft){
@@ -1652,7 +1770,7 @@ const SYM_IMG = {
   const BONUS_GAME_BET = 1;
   const BONUS_GAME_PAYOUT = 15;
   // 解除率: chance that 🍒 also triggers a BB/RB bonus (1:1 split), varies by setting
-  const CHERRY_BONUS_RATE = [0.10, 0.10, 0.15, 0.15, 0.20, 0.20];
+  const CHERRY_BONUS_RATE = [0.10, 0.10, 0.15, 0.15, 0.20, 0.20, 0, 0.25]; // index6=設定L(裏), index7=設定D(裏)
   // 🍉 always triggers a bonus (100%), and it is always BB, for every setting
   function triggerBonus(bonusType, trigger, skipTransition){
     const hadBonusHistory = (state.bbCount + state.rbCount) >= 1;
@@ -1712,6 +1830,9 @@ const SYM_IMG = {
     if(state.bonusGame){
       return doBonusGameSpin();
     }
+    if(state.zenchoRTGamesLeft > 0){
+      return doZenchoRTSpin();
+    }
     const isFreeSpin = state.replayCredit > 0;
     const bet = isFreeSpin ? 0 : BET;
     if(isFreeSpin) state.replayCredit--;
@@ -1729,6 +1850,28 @@ const SYM_IMG = {
       outcome = outcomes.find(o => o.key === bonusType) || null;
     } else {
       outcome = (forced !== undefined) ? forced : pickOutcome();
+      // 前兆RT突入判定: BB/RBが出た場合のみ対象。強制フラグでRTあり/なしを指定した場合はそれに従う
+      if(outcome && (outcome.key === 'bb' || outcome.key === 'rb')){
+        let enterRT;
+        if(forced !== undefined && state.forceRT !== null){
+          enterRT = state.forceRT;
+        } else {
+          const m = state.mode;
+          let rtChance = 0;
+          if(m === 'normal' || m === 'chance') rtChance = 0.20;
+          else if(m === 'hamari') rtChance = 0.60;
+          // 連チャン・爆連: 前兆なし(即当選)
+          enterRT = rtChance > 0 && Math.random() < rtChance;
+        }
+        if(enterRT){
+          state.zenchoPendingBonus = outcome.key;
+          const rtLen = 5 + Math.floor(Math.random() * 28); // 5〜32Gの均等振り分け
+          state.zenchoRTGamesLeft = rtLen;
+          state.zenchoIsMinRT = (rtLen === 5); // 5G選択時は毎G一瞬点灯(リプレイ関係なし)
+          outcome = null; // 今回はハズレとして処理し、当たりはRT消化後に持ち越す
+        }
+      }
+      state.forceRT = null;
     }
     state.totalSpins++;
     state.currentSpins++;
@@ -1825,6 +1968,134 @@ const SYM_IMG = {
     const effectiveLeftOnly = !!(outcome && outcome.leftOnly) && !cherryFullLine;
     const grid = buildDecoratedGrid(reels, winLine, effectiveLeftOnly);
     return {reels, label, isWin, payout, bet, leftOnly: effectiveLeftOnly, winLine, isBonus, isPremium, grid, key: outcome ? outcome.key : null, trigger: forcedTrigger};
+  }
+
+  // 前兆RT消化中の1ゲーム: リプレイ確率1/3、ベルのみ通常通り、スイカ・チェリー・BB/RBはこの間出さない。
+  // 最終Gで持ち越していたBB/RBを確定発動し、通常の花点滅演出につなげる。
+  function doZenchoRTSpin(){
+    state.zenchoRTGamesLeft--;
+    const bet = BET;
+    state.totalSpins++;
+    state.currentSpins++;
+    state.totalIn += bet;
+    if(state.watermelonBgSpinsLeft > 0){
+      state.watermelonBgSpinsLeft--;
+      if(state.watermelonBgSpinsLeft === 0) state.suppressNight = true;
+    }
+
+    let payout = 0;
+    let reels;
+    let label = 'ハズレ';
+    let isWin = false;
+    let winLine = 'mid';
+    let isBonus = false;
+    let key = null;
+    let trigger = null;
+
+    if(state.zenchoRTGamesLeft === 0){
+      // RT消化完了: 持ち越していた当たりを確定発動
+      const bonusType = state.zenchoPendingBonus;
+      state.zenchoPendingBonus = null;
+      state.zenchoIsMinRT = false;
+      const outcomes = buildOutcomes(state.mode);
+      const outcome = outcomes.find(o => o.key === bonusType);
+      isWin = true;
+      label = outcome ? outcome.label : 'ボーナス';
+      if(bonusType === 'bb'){
+        const canBar = (state.mode !== 'normal' && state.mode !== 'hamari');
+        const useBar = canBar && Math.random() < 0.3;
+        reels = useBar ? ['bar','bar','bar'] : ['seven','seven','seven'];
+      } else {
+        reels = Math.random() < 0.5 ? ['seven','seven','bar'] : ['bar','bar','seven'];
+      }
+      winLine = pickMinorLine();
+      state.currentBonusIsFromWatermelon = false;
+      payout = triggerBonus(bonusType, 'zencho');
+      isBonus = true;
+      key = bonusType;
+      trigger = 'zencho';
+    } else {
+      // RT消化中: リプレイ1/3・ベルは通常確率、スイカ・チェリーも通常確率で出現(見た目・払出のみ。解除抽選はここでは行わない)
+      let isLeftOnly = false;
+      const r = Math.random();
+      if(r < 1/3){
+        reels = ['replay','replay','replay'];
+        label = 'リプレイ';
+        isWin = true;
+        winLine = pickMinorLine();
+        state.replayCredit++;
+        state.counts.replay++;
+        key = 'replay';
+      } else if(r < 1/3 + FIXED_PROB.bell){
+        reels = ['bell','bell','bell'];
+        label = 'ベル';
+        isWin = true;
+        winLine = pickMinorLine();
+        payout = 6;
+        state.counts.bell++;
+        key = 'bell';
+      } else if(r < 1/3 + FIXED_PROB.bell + FIXED_PROB.watermelon){
+        reels = ['watermelon','watermelon','watermelon'];
+        isWin = true;
+        winLine = pickMinorLine();
+        payout = 5;
+        state.counts.watermelon++;
+        key = 'watermelon';
+        // 通常通りの解除: 次回BB確定+フリーズ演出。RTで持ち越していた分はスイカ確定に切り替え
+        state.mode = 'bakuren';
+        state.modeSelectCounts.bakuren = (state.modeSelectCounts.bakuren || 0) + 1;
+        state.pendingBonus = 'bb';
+        state.pendingBonusTrigger = 'watermelon';
+        state.watermelonBgSpinsLeft = 500;
+        state.zenchoRTGamesLeft = 0;
+        state.zenchoPendingBonus = null;
+        state.zenchoIsMinRT = false;
+        label = 'スイカ 爆連モード突入！次回BB確定！！';
+      } else if(r < 1/3 + FIXED_PROB.bell + FIXED_PROB.watermelon + FIXED_PROB.cherry){
+        reels = randomDecorReels('cherry');
+        label = 'チェリー';
+        isWin = true;
+        winLine = pickCherryLineNoBonus();
+        payout = (winLine === 'mid') ? 2 : 4;
+        state.counts.cherry++;
+        key = 'cherry';
+        isLeftOnly = true;
+        // 通常通りの解除抽選: 当選すれば次回BB/RB確定。RTで持ち越していた分は解除に切り替え
+        if(Math.random() < CHERRY_BONUS_RATE[state.setting - 1]){
+          const bonusType = Math.random() < 0.5 ? 'bb' : 'rb';
+          state.pendingBonus = bonusType;
+          state.pendingBonusTrigger = 'cherry';
+          state.zenchoRTGamesLeft = 0;
+          state.zenchoPendingBonus = null;
+          state.zenchoIsMinRT = false;
+          label = `チェリー解除！次回${bonusType.toUpperCase()}確定！！`;
+        }
+      } else {
+        reels = randomDecorReels();
+      }
+      // 一瞬(0.05秒)花が点灯する隠しヒント。RTが5G選択時は毎G必ず点灯(リプレイ関係なし)。それ以外は1/16でリプレイ以外の時のみ即点灯
+      let zenchoFlashNow = false;
+      if(state.zenchoIsMinRT){
+        zenchoFlashNow = true;
+      } else if(Math.random() < (1/16)){
+        if(key === 'replay'){
+          state.zenchoFlashPending = true;
+        } else {
+          zenchoFlashNow = true;
+        }
+      }
+
+      state.totalOut += payout;
+      pushPoint(state.graphNet, state.totalSpins, state.totalOut - state.totalIn);
+      const grid2 = buildDecoratedGrid(reels, winLine, isLeftOnly);
+      return {reels, label, isWin, payout, bet, leftOnly:isLeftOnly, winLine, isBonus, isPremium:false, grid:grid2, key, trigger, zenchoFlash:zenchoFlashNow};
+    }
+
+    state.totalOut += payout;
+    pushPoint(state.graphNet, state.totalSpins, state.totalOut - state.totalIn);
+
+    const grid = buildDecoratedGrid(reels, winLine, false);
+    return {reels, label, isWin, payout, bet, leftOnly:false, winLine, isBonus, isPremium:false, grid, key, trigger};
   }
 
   // ---- DOM refs ----
@@ -1993,12 +2264,13 @@ const SYM_IMG = {
   }
   function updateBackground(){
     if(!bgLayerA || !bgLayerB) return;
+    const isHiddenSetting = state.setting === 7 || state.setting === 8;
     const inBonus = !!state.bonusGame;
     const hasBonusHistory = (state.bbCount + state.rbCount) >= 1;
     const inBonusAsNight = inBonus && !!state.bonusStartedInNight;
-    const showWatermelon = (state.watermelonBgSpinsLeft || 0) > 0;
-    const showBonus = !showWatermelon && inBonus && !inBonusAsNight;
-    const showNight = !showWatermelon && !state.suppressNight && (inBonusAsNight || (!inBonus && hasBonusHistory && state.currentSpins >= 0 && state.currentSpins <= 100));
+    const showWatermelon = !isHiddenSetting && (state.watermelonBgSpinsLeft || 0) > 0;
+    const showBonus = !isHiddenSetting && !showWatermelon && inBonus && !inBonusAsNight;
+    const showNight = isHiddenSetting || (!showWatermelon && !state.suppressNight && (inBonusAsNight || (!inBonus && hasBonusHistory && state.currentSpins >= 0 && state.currentSpins <= 100)));
     const newState = showWatermelon ? 'watermelon' : (showBonus ? 'bonus' : (showNight ? 'night' : 'day'));
 
     if(lastBgState === null){
@@ -2059,6 +2331,10 @@ const SYM_IMG = {
     if(settingSel && settingSel.value !== String(state.setting)){
       settingSel.value = String(state.setting);
     }
+    const hiddenSectionL = document.getElementById('hiddenSettingManualSectionL');
+    if(hiddenSectionL) hiddenSectionL.style.display = (state.setting === 7) ? '' : 'none';
+    const hiddenSectionD = document.getElementById('hiddenSettingManualSectionD');
+    if(hiddenSectionD) hiddenSectionD.style.display = (state.setting === 8) ? '' : 'none';
 
     document.getElementById('v-spins').textContent = state.totalSpins.toLocaleString();
     document.getElementById('v-current').textContent = state.currentSpins.toLocaleString();
@@ -2121,11 +2397,12 @@ const SYM_IMG = {
       const LIMIT = 300;
       const shown = hist.slice(-LIMIT).slice().reverse();
       const TRIGGER_ICON = { cherry:'🍒', watermelon:'🍉', direct:'―' };
+      const histLabel = (key, meta) => key==='normal' ? '通常' : (meta.icon + (key==='renchan' ? '連ﾁｬﾝ' : meta.label));
       body.innerHTML = shown.map(e => {
         const fromMeta = MODE_META[e.modeAtWin] || MODE_META.normal;
         const toMeta = MODE_META[e.modeAfter] || MODE_META.normal;
-        const fromTxt = (e.modeAtWin==='normal'?'通常':fromMeta.icon+fromMeta.label);
-        const toTxt = (e.modeAfter==='normal'?'通常':toMeta.icon+toMeta.label);
+        const fromTxt = histLabel(e.modeAtWin, fromMeta);
+        const toTxt = histLabel(e.modeAfter, toMeta);
         const changed = e.modeAtWin !== e.modeAfter;
         const triggerIcon = TRIGGER_ICON[e.trigger] || '―';
         return `
@@ -2168,7 +2445,7 @@ const SYM_IMG = {
       const payoutSum = curChain.reduce((s,ev)=> s + (BONUS_PAYOUT[ev.type]||0), 0);
       if(payoutSum > maxChainPayout) maxChainPayout = payoutSum;
     });
-    document.getElementById('h-maxrenchan').textContent = hist.length ? `${maxChain}連チャン` : '---連チャン';
+    document.getElementById('h-maxrenchan').textContent = hist.length ? `${maxChain}連ﾁｬﾝ` : '---連ﾁｬﾝ';
     document.getElementById('h-maxrenchanpayout').textContent = hist.length ? `${maxChainPayout.toLocaleString()} 枚` : '--- 枚';
 
     // 最大ハマり: longest gap (in games) without a bonus, including the current ongoing gap
@@ -2348,6 +2625,13 @@ const SYM_IMG = {
   function clearFlowerPatterns(){
     flowerEls.forEach(f=>{ if(f){ f.classList.remove('blinking','pattern337','patternAlt','patternFast','patternSolid'); } });
   }
+  // 前兆RT中の隠しヒント: 一瞬(0.05秒)だけ花を光らせる。画面上には前兆であることを示す表示は一切ない
+  function flashFlowerBriefly(){
+    flowerEls.forEach(f=>{ if(f) f.classList.add('patternSolid'); });
+    setTimeout(()=>{
+      flowerEls.forEach(f=>{ if(f) f.classList.remove('patternSolid'); });
+    }, 50);
+  }
 
   let medleyTimer = null;
   function startFlowerMedley(){
@@ -2410,9 +2694,14 @@ const SYM_IMG = {
       if(withAnim){
         animating = true;
         clearWinCells();
+        setFlash(false);
         if(winOverlay) winOverlay.classList.remove('show');
         if(!result.inBonusGame){
           clearFlowerPatterns();
+        }
+        if(state.zenchoFlashPending){
+          state.zenchoFlashPending = false;
+          flashFlowerBriefly();
         }
         const revealFlowers = () => { if(result.trigger !== 'watermelon') SFX.flowerBlink(); result.isPremium ? playPremiumPattern() : setFlowerBlink(true); };
         if(blinkTrigger === 'spin') revealFlowers();
@@ -2552,8 +2841,13 @@ const BONUS_OVERLAY_IMG = {
     setFlash(result.isWin && result.payout>0, result.leftOnly);
     showWinCells(result.isWin ? result.winLine : null, result.isWin && result.leftOnly);
     showWinOverlay(result);
+    if(result.zenchoFlash){
+      flashFlowerBriefly();
+    }
     if(result.isBonus){
       SFX.bonus();
+    } else if(result.key === 'watermelon' && result.isWin){
+      SFX.horn();
     } else if(result.isWin && !result.inBonusGame){
       SFX.win();
     }
@@ -2659,8 +2953,13 @@ const BONUS_OVERLAY_IMG = {
   function finishBeginReelSpinFromPeek(){
     tapBlinkTrigger = tapResult.isBonus ? pickBlinkTrigger() : null;
     clearWinCells();
+    setFlash(false);
     if(winOverlay) winOverlay.classList.remove('show');
     if(!tapResult.inBonusGame) clearFlowerPatterns();
+    if(state.zenchoFlashPending){
+      state.zenchoFlashPending = false;
+      flashFlowerBriefly();
+    }
     if(tapBlinkTrigger === 'spin') tapRevealFlowers();
     SFX.spinStart();
     reelEls.forEach(r=>r.classList.add('spinning'));
@@ -2766,12 +3065,16 @@ const BONUS_OVERLAY_IMG = {
   function batchSpin(n){
     if(animating) return;
     stopAuto();
-    for(let i=0;i<n;i++){ doSpin(); }
+    const targetTotal = state.totalSpins + n;
+    let safety = n * 50 + 10000; // generous cap in case of any unexpected stall, avoids a true infinite loop
+    while(state.totalSpins < targetTotal && safety-- > 0){
+      doSpin();
+    }
     // reflect the last real reel state
     render();
     drawGraph();
     renderHistory();
-    resultLine.textContent = `${n.toLocaleString()}回転を一括消化しました`;
+    resultLine.textContent = `${n.toLocaleString()}G(総G数)を一括消化しました`;
   }
   document.getElementById('spin100').addEventListener('click', ()=>batchSpin(100));
   document.getElementById('spin1000').addEventListener('click', ()=>batchSpin(1000));
