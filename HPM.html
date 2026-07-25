@@ -2161,13 +2161,15 @@ const SYM_IMG = {
     if(reels[0]===reels[1] && reels[1]===reels[2] && reels[0]!=='blank'){
       reels[2] = 'blank';
     }
-    // also avoid accidentally landing on a BB/RB-reserved combo (7-7-7, BAR-BAR-BAR, 7-7-BAR, BAR-BAR-7)
-    if(matchesSpecialWinPattern(reels)){
-      reels[2] = 'blank';
-    }
-    // 7・バーのみの組み合わせ(ST残り5G以内専用の演出)が通常ハズレで偶然出ないようにする
-    if(reels.every(s => s === 'seven' || s === 'bar')){
-      reels[2] = 'blank';
+    // 7・白7・BARが位置を問わず2つ以上一致している場合(ボーナス図柄の組み合わせ揃いに見える形)を崩す
+    if(isPremiumRepeat(reels)){
+      const s = ['seven','seven2','bar'].find(sym =>
+        (reels[0]===sym?1:0) + (reels[1]===sym?1:0) + (reels[2]===sym?1:0) >= 2
+      );
+      // 一致しているセルのうち1つだけを崩す(3つとも一致なら1つ、2つ一致ならそのどちらか)
+      if(reels[0] === s && reels[1] === s) reels[1] = 'blank';
+      else if(reels[1] === s && reels[2] === s) reels[2] = 'blank';
+      else if(reels[0] === s && reels[2] === s) reels[2] = 'blank';
     }
     // 小役テンパイ風(2リール一致+3リール目だけ外れ、ST残り5G以内専用の演出)が通常ハズレで偶然出ないようにする(位置の組み合わせ問わず)
     if(isTenpaiShape(reels)){
@@ -2534,6 +2536,13 @@ const SYM_IMG = {
       return count === 2;
     });
   }
+  // 7・白7・BARのいずれかが位置を問わず2つ以上一致しているか(ボーナス図柄の組み合わせ揃いに見える形は全て対象)
+  function isPremiumRepeat(syms){
+    return ['seven','seven2','bar'].some(sym => {
+      const count = (syms[0]===sym?1:0) + (syms[1]===sym?1:0) + (syms[2]===sym?1:0);
+      return count >= 2;
+    });
+  }
   // ST残り5G以内のハズレ目演出で使う「7とバーの組み合わせ揃い」(揃い目=当選パターンは除外)
   const SEVEN_BAR_TEASE_PATTERNS = (() => {
     const syms = ['seven','bar'];
@@ -2569,11 +2578,10 @@ const SYM_IMG = {
         const rows = LINE_ROWS[lineKey];
         const syms = lineSymbols(grid, lineKey);
         const isUniformMatch = syms[0] !== 'blank' && syms[0] === syms[1] && syms[1] === syms[2];
-        const isSpecialMatch = matchesSpecialWinPattern(syms);
-        const isSevenBarTease = syms.every(s => s === 'seven' || s === 'bar');
+        const isPremiumMatch = isPremiumRepeat(syms);
         const isTenpaiReach = isTenpaiShape(syms);
-        if(!(isUniformMatch || isSpecialMatch || isSevenBarTease || isTenpaiReach)) continue;
-        // 「2セル一致+1セル不一致」の形(テンパイ/77バー等の特殊揃い)は、一致している側のセルを
+        if(!(isUniformMatch || isPremiumMatch || isTenpaiReach)) continue;
+        // 「2セル一致+1セル不一致」の形(テンパイ/7・白7・BARの組み合わせ揃いなど)は、一致している側のセルを
         // 狙って崩さないと直らない(不一致側を書き換えても一致ペアが残ってしまうため)。
         // 3セルとも一致する形(777・バー3つ揃いなど)はどのセルを崩しても良いのでtargetSymはnullのまま。
         let targetSym = null;
