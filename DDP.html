@@ -2138,14 +2138,14 @@ const SYM_IMG = {
     return ALL_LINES[Math.floor(Math.random()*ALL_LINES.length)];
   }
   const SYM_SIZE = {
-    seven: 92,
-    bar: 80,
+    seven: 98,
+    bar: 90,
   };
   function setCell(el, k){
     const s = SYM[k];
     const img = SYM_IMG[k];
     if(img){
-      const sz = SYM_SIZE[k] || 68;
+      const sz = SYM_SIZE[k] || 80;
       el.innerHTML = `<img src="${img}" alt="${k}" style="max-width:${sz}%;max-height:${sz}%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 0 5px ${s.c}88);display:block;">`;
       el.style.color = '';
       el.style.textShadow = '';
