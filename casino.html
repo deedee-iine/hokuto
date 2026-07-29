@@ -155,6 +155,33 @@
     color: var(--gold-bright);
     text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   }
+  .hud .stat .value.negative{
+    color: #ff4d3d;
+  }
+  .balance-fee-flash{
+    font-size: 0.75rem;
+    font-weight:bold;
+    color: #ff6b5e;
+    margin-left: 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .balance-fee-flash.show{
+    opacity: 1;
+  }
+  #betStat.win-mode .label{
+    color: #6dffb0;
+  }
+  #betStat.win-mode .value{
+    color: #6dffb0;
+    text-shadow: 0 0 8px rgba(109,255,176,0.8);
+    animation: winPulse 0.4s ease;
+  }
+  @keyframes winPulse{
+    0%{ transform: scale(0.7); opacity: 0.3; }
+    60%{ transform: scale(1.15); opacity: 1; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
 
   .table-area{
     flex: 1 1 auto;
@@ -179,7 +206,14 @@
     height:100%;
     position:relative;
   }
-  #bjCenter > .zone-dealer, #bacCenter > .zone:first-child{
+  #bjCenter > .zone-dealer{
+    flex: 0 0 79%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    margin-bottom:0;
+  }
+  #bacCenter > .zone:first-child{
     flex: 0 0 75%;
     display:flex;
     flex-direction:column;
@@ -234,27 +268,57 @@
     display:flex;
     flex-direction:column;
     align-items:center;
+    justify-content:flex-start;
     gap: 2px;
-    min-height: 0;
+    min-height: 64px;
   }
   .lightning-info .card{
-    --card-w: 26px;
+    --card-w: 40px;
     margin-left: 0;
   }
+  .lightning-cards-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 2px;
+  }
+  .lightning-cards-row .card{
+    --card-w: 32px;
+    margin-left: -8px;
+    animation: lightningFlip 0.4s ease;
+  }
+  .lightning-cards-row .card:first-child{ margin-left: 0; }
+  .lightning-cards-row .lightning-joker{
+    margin-left: -8px;
+    animation: lightningFlip 0.4s ease;
+  }
+  .lightning-cards-row .lightning-joker:first-child{ margin-left: 0; }
+  .lightning-info .card.back{
+    animation: none;
+  }
+  @keyframes lightningFlip{
+    0%{ transform: rotateY(90deg) scale(0.8); opacity:0.3; }
+    60%{ transform: rotateY(-12deg) scale(1.05); opacity:1; }
+    100%{ transform: rotateY(0deg) scale(1); opacity:1; }
+  }
   .lightning-info .lightning-joker{
-    width: 26px;
-    height: 36px;
+    width: 32px;
+    height: 44px;
     border-radius: 6px;
     background: #1c1c1c;
     border: 1px solid rgba(255,255,255,0.5);
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size: 1rem;
+    font-size: 2rem;
+    line-height: 1;
+    padding: 0;
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    flex: 0 0 auto;
+    overflow: hidden;
   }
   .lightning-info .lightning-mult{
-    font-size: 0.62rem;
+    font-size: 0.72rem;
     font-weight:bold;
     color: #ffe066;
     background: rgba(0,0,0,0.6);
@@ -262,7 +326,127 @@
     padding: 0px 5px;
     white-space: nowrap;
   }
+  .winrate-pie{
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    background: rgba(255,255,255,0.15);
+    margin-top: 4px;
+  }
+  .winrate-legend{
+    font-size: 0.58rem;
+    line-height: 1.4;
+    text-align: left;
+    background: rgba(0,0,0,0.4);
+    border-radius: 5px;
+    padding: 3px 7px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+  .winrate-legend div{ display:flex; justify-content:space-between; gap:6px; }
+  .winrate-legend .lg-win{ color:#6dffb0; font-weight:bold; }
+  .winrate-legend .lg-lose{ color:#ff6b60; font-weight:bold; }
+  .winrate-legend .lg-draw{ color:#f0e2ae; font-weight:bold; }
+  .winrate-legend .lg-player{ color:#7ec8ff; font-weight:bold; }
+  .winrate-legend .lg-banker{ color:#ff8a7a; font-weight:bold; }
+  .winrate-legend .lg-tie{ color:#6dffb0; font-weight:bold; }
 
+  .bj-result-overlay{
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
+    z-index: 10;
+    pointer-events:none;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .bj-result-center{
+    position:absolute;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 6px;
+  }
+  .bj-result-overlay.show{
+    opacity: 1;
+    transform: scale(1);
+  }
+  .bj-result-text{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 4px;
+    padding: 10px 28px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.5);
+  }
+  .bj-result-word{
+    font-family: Georgia, serif;
+    font-size: 2.6rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    line-height: 1;
+  }
+  .bj-result-overlay.win .bj-result-text{
+    color: #6dffb0;
+    border-color: #6dffb0;
+    box-shadow: 0 0 24px 4px rgba(109,255,176,0.5);
+  }
+  .bj-result-overlay.lose .bj-result-text{
+    color: #ff6b60;
+    border-color: #ff6b60;
+    box-shadow: 0 0 24px 4px rgba(255,107,96,0.5);
+  }
+  .bj-result-overlay.draw .bj-result-text{
+    color: #f0e2ae;
+    border-color: #f0e2ae;
+    box-shadow: 0 0 24px 4px rgba(240,226,174,0.5);
+  }
+  .bj-result-overlay.bac-player .bj-result-text{
+    color: #7ec8ff;
+    border-color: #7ec8ff;
+    box-shadow: 0 0 24px 4px rgba(126,200,255,0.5);
+  }
+  .bj-result-overlay.bac-banker .bj-result-text{
+    color: #ff8a7a;
+    border-color: #ff8a7a;
+    box-shadow: 0 0 24px 4px rgba(255,138,122,0.5);
+  }
+  .bj-result-overlay.bac-tie .bj-result-text{
+    color: #6dffb0;
+    border-color: #6dffb0;
+    box-shadow: 0 0 24px 4px rgba(109,255,176,0.5);
+  }
+  .bj-result-breakdown{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 1px;
+    margin: 2px 0;
+  }
+  .bj-result-breakdown div{
+    font-size: 0.62rem;
+    color: #d8c9a0;
+    white-space: nowrap;
+  }
+  .bj-result-breakdown div.bd-lightning{
+    color: #ffe066;
+    font-weight: bold;
+    text-shadow: 0 0 4px rgba(255,224,102,0.6);
+  }
+  .bj-result-payout{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffe066;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    display:none;
+  }
   .bj-history{
     position:absolute;
     top: 6px;
@@ -467,6 +651,28 @@
     padding: 2px 4px;
     border-radius: 8px;
     min-width: 90px;
+    position: relative;
+  }
+  #bjCenter .hand .zone-label{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    margin: 0;
+    padding: 0;
+    border: none;
+    pointer-events: none;
+  }
+  #bjCenter .hand .zone-label .score{
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: var(--gold-bright);
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(212,175,90,0.5);
+    border-radius: 8px;
+    padding: 1px 12px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
   }
   .hand.active{
     border: 1px solid var(--gold-bright);
@@ -620,6 +826,7 @@
     flex-direction:column;
     gap: 16px;
     flex: 0 0 auto;
+    visibility: hidden;
   }
   .action-col .action-btn{
     width: clamp(52px, 15vw, 70px);
@@ -669,21 +876,40 @@
   .deal-btn:disabled{ opacity:0.35; cursor:not-allowed; }
 
   .insurance-banner{
+    position:absolute;
+    top:0; left:0; right:0; bottom:0;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap: 12px;
-    margin: 4px 0 8px;
-    padding: 8px 12px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(212,175,90,0.3);
-    border-radius: 10px;
-    font-size: 0.82rem;
+    z-index: 12;
+    background: rgba(0,0,0,0.55);
+  }
+  .insurance-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 14px;
+    background: rgba(10,10,10,0.85);
+    border: 1px solid rgba(212,175,90,0.5);
+    border-radius: 16px;
+    padding: 22px 28px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .insurance-text{
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #f0e2ae;
+    text-align:center;
+    line-height: 1.5;
+  }
+  .insurance-btns{
+    display:flex;
+    gap: 14px;
   }
   .insurance-banner button{
     font-family: Georgia, serif;
-    font-size: 0.76rem;
-    padding: 5px 12px;
+    font-size: 0.85rem;
+    padding: 8px 18px;
     border-radius: 999px;
     border: 1px solid var(--panel-border);
     background: transparent;
@@ -715,11 +941,105 @@
     border-color: #8a6a24;
   }
 
-  .bac-spots{
+  .sidebet-row{
     display:flex;
     flex-direction:row;
+    justify-content:center;
     gap: 6px;
+    margin: 2px auto 6px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .sidebet-spot{
+    flex: 1 1 0;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1px;
+    height: 42px;
+    padding: 2px 3px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(0,0,0,0.55);
+    cursor:pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .sidebet-spot.sidebet-main{
+    flex: 1.3 1 0;
+    height: 48px;
+    background: rgba(212,175,90,0.22);
+  }
+  .sidebet-spot .sb-name{
+    font-size: 0.6rem;
+    font-weight:bold;
+    color:#f0e2ae;
+    white-space:nowrap;
+  }
+  .sidebet-spot .sb-amt{
+    font-size: 0.72rem;
+    font-weight:bold;
+    color: var(--gold-bright);
+  }
+  .sidebet-spot.sidebet-main .sb-name{
+    font-size: 0.68rem;
+  }
+  .sidebet-spot.sidebet-main .sb-amt{
+    font-size: 0.85rem;
+  }
+  .sidebet-spot.selected{
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 0 2px var(--gold-bright);
+  }
+
+  .bac-spots-grid{
+    display:grid;
+    grid-template-columns: 0.72fr 1fr 1fr 1fr 0.72fr;
+    gap: 4px;
     margin: 8px 0;
+    align-items: stretch;
+  }
+  .bac-spot-stack{
+    display:flex;
+    flex-direction:column;
+    gap: 3px;
+    height: clamp(44px, 8dvh, 54px);
+  }
+  .bac-spot.bac-spot-stacked{
+    flex: 1 1 0;
+    height:auto;
+    min-height: 0;
+    padding: 0px 3px;
+    gap:0;
+    line-height: 1.05;
+  }
+  .bac-spot-stacked .spot-name{
+    font-size: 0.52rem;
+  }
+  .bac-spot-stacked .spot-payout{
+    display:none;
+  }
+  .bac-spot-stacked .spot-amount{
+    font-size: 0.6rem;
+  }
+  .bac-spot.bac-spot-side{
+    background: linear-gradient(180deg, #6b3fa8, #3a1c6e);
+  }
+  .bac-spot.bac-spot-ppair{
+    background: linear-gradient(180deg, #2f5fa8, #16305c);
+  }
+  .bac-spot.bac-spot-bpair{
+    background: linear-gradient(180deg, #a83f37, #5c1c16);
+  }
+  .bac-spot-side .spot-name{
+    font-size: 0.6rem;
+  }
+  .bac-spot-side .spot-payout{
+    font-size: 0.44rem;
+  }
+  .bac-spot-side .spot-amount{
+    font-size: 0.7rem;
   }
   .bac-spot{
     flex: 1 1 0;
@@ -770,22 +1090,86 @@
     color: var(--gold-bright);
   }
 
-  .slot-machine{
+  #slotCenter{
+    position: relative;
+    height:100%;
+    min-height:0;
+  }
+  .slot-paytable-compact{
+    position: relative;
+    z-index: 2;
+    max-width: 340px;
+    margin: 4px auto 0;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(212,175,90,0.4);
+    border-radius: 8px;
+    padding: 4px 6px;
+  }
+  .spc-title{
+    text-align:center;
+    font-size:0.56rem;
+    letter-spacing:0.03em;
+    color: var(--gold-bright);
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid rgba(212,175,90,0.25);
+  }
+  .spc-row{
     display:flex;
+    justify-content:space-between;
+    gap: 2px;
+  }
+  .spc-cell{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 1px;
+    flex: 1 1 0;
+    min-width:0;
+  }
+  .spc-sym{
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+  .spc-txt{
+    font-size: 0.42rem;
+    color:#c9b78a;
+    white-space:nowrap;
+  }
+  .spc-mult{
+    font-size: 0.48rem;
+    font-weight:bold;
+    color: var(--gold-bright);
+    white-space:nowrap;
+  }
+  .slot-reel-spacer{
+    display:none;
+  }
+  .slot-machine{
+    position: absolute;
+    top: 24.2dvh;
+    height: 15.9dvh;
+    left: 6.3%;
+    width: 53.1%;
+    display:flex;
+    align-items:center;
     justify-content:center;
-    margin: 6px 0 10px;
+    z-index: 1;
   }
   .slot-reels{
     display:flex;
-    gap: 8px;
+    gap: 4px;
     background: rgba(0,0,0,0.35);
     border: 2px solid var(--gold);
-    border-radius: 12px;
-    padding: 10px 14px;
+    border-radius: 10px;
+    padding: 6px 8px;
   }
   .slot-reel{
-    width: clamp(56px, 17vw, 84px);
-    height: clamp(56px, 17vw, 84px);
+    width: clamp(38px, 12vw, 52px);
+    height: clamp(38px, 12vw, 52px);
     background-color: #fff;
     background-size: 78%;
     background-repeat: no-repeat;
@@ -801,57 +1185,34 @@
     50%{ transform: translateY(4px); opacity:1; }
     100%{ transform: translateY(-4px); opacity:0.6; }
   }
-  .slot-paytable{
-    max-width: 300px;
+  .slot-history{
+    position: absolute;
+    top: 41dvh;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    max-width: 340px;
+    width: 100%;
     margin: 0 auto;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(212,175,90,0.3);
-    border-radius: 10px;
-    padding: 8px 10px 6px;
+    padding: 4px 8px;
+    display:flex;
+    flex-direction:column;
+    gap: 2px;
+    z-index: 1;
   }
-  .pay-title{
-    text-align:center;
-    font-size:0.72rem;
-    letter-spacing:0.05em;
-    color: var(--gold-bright);
-    padding: 2px 0 6px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid rgba(212,175,90,0.3);
-  }
-  .pay-row{
-    display:grid;
-    grid-template-columns: 36px 1fr 1fr;
+  .slot-history .sh-row{
+    display:flex;
     align-items:center;
-    font-size:0.85rem;
-    color:#f0e6cf;
-    padding: 4px 4px;
-    border-radius: 6px;
+    justify-content:center;
+    gap: 6px;
+    font-size: 0.6rem;
+    background: rgba(0,0,0,0.35);
+    border-radius: 5px;
+    padding: 2px 6px;
   }
-  .pay-row + .pay-row{
-    border-top: 1px solid rgba(255,255,255,0.06);
-  }
-  .pay-row > span:nth-child(2){ text-align:center; }
-  .pay-row > span:nth-child(3){ text-align:right; font-weight:bold; color: var(--gold-bright); }
-  .pay-header{
-    font-size:0.64rem;
-    letter-spacing:0.08em;
-    color:#a8916a;
-    background: none !important;
-    padding: 0 4px 4px;
-  }
-  .pay-header > span:nth-child(2){ text-align:center; }
-  .pay-header > span:nth-child(3){ text-align:right; }
-  .pay-row .pay-sym{
-    width: 26px;
-    height: 26px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-  .pay-row .pay-sym.pay-sym-big{
-    width: 34px;
-    height: 34px;
-  }
+  .slot-history .sh-win{ color:#6dffb0; font-weight:bold; }
+  .slot-history .sh-lose{ color:#8a8a8a; }
 </style>
 </head>
 <body>
@@ -866,10 +1227,21 @@
 
   <div class="center-table" id="centerTable">
     <div id="bjCenter">
+      <div class="bj-result-overlay" id="bjResultOverlay">
+        <div class="bj-result-center">
+          <div class="bj-result-text" id="bjResultText">
+            <span class="bj-result-word" id="bjResultWord"></span>
+            <div class="bj-result-breakdown" id="bjResultBreakdown"></div>
+            <span class="bj-result-payout" id="bjResultPayout"></span>
+          </div>
+        </div>
+      </div>
       <div class="bj-history" id="bjHistory"></div>
       <div class="lightning-wrap">
         <button class="lightning-btn" id="bjLightningBtn">⚡</button>
         <div class="lightning-info" id="bjLightningInfo"></div>
+        <div class="winrate-pie" id="bjWinratePie"></div>
+        <div class="winrate-legend" id="bjWinrateLegend"></div>
       </div>
       <div class="zone zone-dealer">
         <div class="dealer-header">
@@ -884,9 +1256,13 @@
       </div>
 
       <div id="insuranceBanner" class="insurance-banner" style="display:none;">
-        <span>ディーラーの表カードは A です。インシュランスを賭けますか？</span>
-        <button id="insYes">はい (半額)</button>
-        <button id="insNo">いいえ</button>
+        <div class="insurance-card">
+          <div class="insurance-text">インシュランスを<br>賭けますか？</div>
+          <div class="insurance-btns">
+            <button id="insYes">はい (半額)</button>
+            <button id="insNo">いいえ</button>
+          </div>
+        </div>
       </div>
 
       <div class="zone zone-player">
@@ -905,10 +1281,21 @@
     </div>
 
     <div id="bacCenter" style="display:none;">
+      <div class="bj-result-overlay" id="bacResultOverlay">
+        <div class="bj-result-center">
+          <div class="bj-result-text" id="bacResultText">
+            <span class="bj-result-word" id="bacResultWord"></span>
+            <div class="bj-result-breakdown" id="bacResultBreakdown"></div>
+            <span class="bj-result-payout" id="bacResultPayout"></span>
+          </div>
+        </div>
+      </div>
       <div class="bac-road" id="bacRoad"></div>
       <div class="lightning-wrap">
         <button class="lightning-btn" id="bacLightningBtn">⚡</button>
         <div class="lightning-info" id="bacLightningInfo"></div>
+        <div class="winrate-pie" id="bacWinratePie"></div>
+        <div class="winrate-legend" id="bacWinrateLegend"></div>
       </div>
       <div class="bac-spacer"></div>
       <div class="bac-row">
@@ -929,6 +1316,18 @@
     </div>
 
     <div id="slotCenter" style="display:none;">
+      <div class="slot-paytable-compact" id="slotPaytableCompact">
+        <div class="spc-title" id="payTitle">配当確率（還元率 約97%）</div>
+        <div class="spc-row">
+          <div class="spc-cell"><span class="spc-sym" id="paySym0"></span><span class="spc-txt" id="payProb0">1/4</span><span class="spc-mult">リスピン</span></div>
+          <div class="spc-cell"><span class="spc-sym" id="paySym1"></span><span class="spc-txt" id="payProb1">1/8</span><span class="spc-mult">x2</span></div>
+          <div class="spc-cell"><span class="spc-sym" id="paySym2"></span><span class="spc-txt" id="payProb2">1/25</span><span class="spc-mult">x5</span></div>
+          <div class="spc-cell"><span class="spc-sym" id="paySym3"></span><span class="spc-txt" id="payProb3">1/40</span><span class="spc-mult">x7</span></div>
+          <div class="spc-cell"><span class="spc-sym" id="paySym4"></span><span class="spc-txt" id="payProb4">1/70</span><span class="spc-mult">x10</span></div>
+          <div class="spc-cell"><span class="spc-sym" id="paySym5"></span><span class="spc-txt" id="payProb5">1/100</span><span class="spc-mult">x20</span></div>
+        </div>
+      </div>
+      <div class="slot-reel-spacer"></div>
       <div class="slot-machine">
         <div class="slot-reels">
           <div class="slot-reel" id="reel1" data-sym="bell"></div>
@@ -936,24 +1335,24 @@
           <div class="slot-reel" id="reel3" data-sym="seven"></div>
         </div>
       </div>
-      <div class="slot-paytable">
-        <div class="pay-title" id="payTitle">配当確率（還元率 約97%）</div>
-        <div class="pay-row pay-header">
-          <span class="pay-sym"></span><span>確率</span><span>配当</span>
-        </div>
-        <div class="pay-row"><span class="pay-sym" id="paySym0"></span><span id="payProb0">1/4</span><span>リスピン</span></div>
-        <div class="pay-row"><span class="pay-sym" id="paySym1"></span><span id="payProb1">1/8</span><span>x2</span></div>
-        <div class="pay-row"><span class="pay-sym" id="paySym2"></span><span id="payProb2">1/25</span><span>x5</span></div>
-        <div class="pay-row"><span class="pay-sym" id="paySym3"></span><span id="payProb3">1/40</span><span>x7</span></div>
-        <div class="pay-row"><span class="pay-sym pay-sym-big" id="paySym4"></span><span id="payProb4">1/70</span><span>x10</span></div>
-        <div class="pay-row"><span class="pay-sym pay-sym-big" id="paySym5"></span><span id="payProb5">1/100</span><span>x20</span></div>
-      </div>
+      <div class="slot-history" id="slotHistory"></div>
     </div>
   </div>
 
   <div class="bottom-panel">
     <div id="bjBottom">
       <div class="message" id="message">チップを選んでベットしてください</div>
+      <div class="sidebet-row" id="bjSidebetRow">
+        <div class="sidebet-spot" data-target="pp" id="targetPP">
+          <span class="sb-name">Perfect Pairs</span><span class="sb-amt" id="amtPP">0</span>
+        </div>
+        <div class="sidebet-spot sidebet-main selected" data-target="main" id="targetMain">
+          <span class="sb-name">MAIN</span><span class="sb-amt" id="amtMain">0</span>
+        </div>
+        <div class="sidebet-spot" data-target="tri" id="targetTri">
+          <span class="sb-name">21+3</span><span class="sb-amt" id="amtTri">0</span>
+        </div>
+      </div>
 
       <div class="bet-controls" id="betControls">
         <div class="chip-row">
@@ -973,21 +1372,38 @@
     <div id="bacBottom" style="display:none;">
       <div class="message" id="bacMessage">賭け先を選んでチップでベットしてください</div>
 
-      <div class="bac-spots">
-        <div class="bac-spot selected" data-target="player" id="spotPlayer">
+      <div class="bac-spots-grid">
+        <div class="bac-spot bac-spot-side bac-spot-ppair" data-target="ppair" id="spotPPair" style="grid-column:1; grid-row:1;">
+          <span class="spot-name">Pair</span>
+          <span class="spot-payout">11 to 1</span>
+          <span class="spot-amount" id="amtPPair">0</span>
+        </div>
+        <div class="bac-spot selected" data-target="player" id="spotPlayer" style="grid-column:2; grid-row:1;">
           <span class="spot-name">Player</span>
           <span class="spot-payout">1 to 1</span>
           <span class="spot-amount" id="amtPlayer">0</span>
         </div>
-        <div class="bac-spot" data-target="tie" id="spotTie">
-          <span class="spot-name">Tie</span>
-          <span class="spot-payout">8 to 1</span>
-          <span class="spot-amount" id="amtTie">0</span>
+        <div class="bac-spot-stack" style="grid-column:3; grid-row:1;">
+          <div class="bac-spot bac-spot-stacked" data-target="tie" id="spotTie">
+            <span class="spot-name">Tie</span>
+            <span class="spot-payout">8 to 1</span>
+            <span class="spot-amount" id="amtTie">0</span>
+          </div>
+          <div class="bac-spot bac-spot-side bac-spot-stacked" data-target="dragon" id="spotDragon">
+            <span class="spot-name">Dragon</span>
+            <span class="spot-payout">最大30倍</span>
+            <span class="spot-amount" id="amtDragon">0</span>
+          </div>
         </div>
-        <div class="bac-spot" data-target="banker" id="spotBanker">
+        <div class="bac-spot" data-target="banker" id="spotBanker" style="grid-column:4; grid-row:1;">
           <span class="spot-name">Banker</span>
           <span class="spot-payout">0.95 to 1</span>
           <span class="spot-amount" id="amtBanker">0</span>
+        </div>
+        <div class="bac-spot bac-spot-side bac-spot-bpair" data-target="bpair" id="spotBPair" style="grid-column:5; grid-row:1;">
+          <span class="spot-name">Pair</span>
+          <span class="spot-payout">11 to 1</span>
+          <span class="spot-amount" id="amtBPair">0</span>
         </div>
       </div>
 
@@ -1025,8 +1441,8 @@
   </div>
 
   <div class="hud">
-    <div class="stat"><span class="label">Balance</span><span class="value" id="balanceVal">10000</span></div>
-    <div class="stat stat-right"><span class="label">Bet</span><span class="value" id="betVal">0</span></div>
+    <div class="stat"><span class="label">Balance</span><span class="value" id="balanceVal">10000</span><span class="balance-fee-flash" id="balanceFeeFlash"></span></div>
+    <div class="stat stat-right" id="betStat"><span class="label" id="betLabel">Bet</span><span class="value" id="betVal">0</span></div>
   </div>
 </div>
 
@@ -1052,15 +1468,51 @@ let balance = 10000;
 function fmt(n){ return Math.round(n).toLocaleString("en-US"); }
 let bet = 0;
 let lastBet = 0;
-let lastBacBets = { player:0, banker:0, tie:0 };
+let lastBjSideBets = { pp: 0, tri: 0 };
+let lastBacBets = { player:0, banker:0, tie:0, ppair:0, bpair:0, dragon:0 };
 let lastSlotBet = 0;
 let deck = [];
 let dealerHand = [];
 let bjHistory = [];
+let bjSideBets = { pp: 0, tri: 0 };
+let bjBetTarget = 'main';
+let bjBreakdown = [];
+function suitOf(code){ return code.slice(-1); }
+function isRedSuit(s){ return s === 'H' || s === 'D'; }
+function rankOrderVal(rank){
+  if(rank === 'A') return 14;
+  if(rank === 'K') return 13;
+  if(rank === 'Q') return 12;
+  if(rank === 'J') return 11;
+  return parseInt(rank, 10);
+}
+function evalPerfectPair(cards){
+  const r0 = rankOf(cards[0]), r1 = rankOf(cards[1]);
+  if(r0 !== r1) return null;
+  const s0 = suitOf(cards[0]), s1 = suitOf(cards[1]);
+  if(s0 === s1) return { name:'パーフェクトペア', mult:25 };
+  if(isRedSuit(s0) === isRedSuit(s1)) return { name:'カラーペア', mult:12 };
+  return { name:'ミックスペア', mult:6 };
+}
+function eval21plus3(cards){
+  const ranks = cards.map(c => rankOf(c));
+  const suits = cards.map(c => suitOf(c));
+  const vals = cards.map(c => rankOrderVal(rankOf(c))).sort((a,b)=>a-b);
+  const sameSuit = suits[0]===suits[1] && suits[1]===suits[2];
+  const sameRank = ranks[0]===ranks[1] && ranks[1]===ranks[2];
+  let isStraight = (vals[1]-vals[0]===1 && vals[2]-vals[1]===1);
+  if(!isStraight && vals[0]===2 && vals[1]===3 && vals[2]===14) isStraight = true;
+  if(sameRank && sameSuit) return { name:'スーテッドトリップス', mult:100 };
+  if(isStraight && sameSuit) return { name:'ストレートフラッシュ', mult:40 };
+  if(sameRank) return { name:'スリーカード', mult:30 };
+  if(isStraight) return { name:'ストレート', mult:10 };
+  if(sameSuit) return { name:'フラッシュ', mult:5 };
+  return null;
+}
 let bjLightning = false;
-let bjLightningCard = null;
+let bjLightningCards = null;
 let bacLightning = false;
-let bacLightningCard = null;
+let bacLightningCards = null;
 function drawLightningCard(){
   const r = Math.random()*100;
   let rank;
@@ -1082,22 +1534,75 @@ function drawLightningCard(){
   const suit = SUITS[Math.floor(Math.random()*SUITS.length)];
   return { mult, label: rank, code: rank + suit };
 }
-function renderLightningInfo(elId, card){
+function rollExtraLightningCount(){
+  const r = Math.random()*100;
+  if(r < 80) return 0;
+  if(r < 95) return 1;
+  return 2;
+}
+function drawLightningCards(){
+  const cards = [drawLightningCard()];
+  const extra = rollExtraLightningCount();
+  for(let i=0;i<extra;i++) cards.push(drawLightningCard());
+  return cards;
+}
+function flashBalanceFee(fee){
+  const el = document.getElementById('balanceFeeFlash');
+  if(!el) return;
+  el.textContent = '-' + fee;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.classList.remove('show'); }, 1400);
+}
+function flashWin(amount){
+  const stat = document.getElementById('betStat');
+  const labelEl = document.getElementById('betLabel');
+  const valEl = document.getElementById('betVal');
+  if(!stat || amount <= 0) return;
+  labelEl.textContent = 'WIN';
+  valEl.textContent = '+' + fmt(amount);
+  stat.classList.add('win-mode');
+}
+function hideWinFlash(){
+  const stat = document.getElementById('betStat');
+  const labelEl = document.getElementById('betLabel');
+  if(!stat) return;
+  stat.classList.remove('win-mode');
+  if(labelEl) labelEl.textContent = 'Bet';
+  updateHud();
+}
+function renderLightningBack(elId){
   const el = document.getElementById(elId);
   if(!el) return;
   el.innerHTML = '';
-  if(!card){ return; }
-  if(card.code){
-    el.appendChild(cardEl(card.code, false, false));
-  } else {
-    const jk = document.createElement('div');
-    jk.className = 'lightning-joker';
-    jk.textContent = '🃏';
-    el.appendChild(jk);
-  }
+  el.appendChild(cardEl('??', true, false));
+}
+function renderLightningOff(elId){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '';
+}
+function renderLightningReveal(elId, cards){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.innerHTML = '';
+  const row = document.createElement('div');
+  row.className = 'lightning-cards-row';
+  cards.forEach(card => {
+    if(card.code){
+      row.appendChild(cardEl(card.code, false, false));
+    } else {
+      const jk = document.createElement('div');
+      jk.className = 'lightning-joker';
+      jk.textContent = '🃏';
+      row.appendChild(jk);
+    }
+  });
+  el.appendChild(row);
+  const totalMult = cards.reduce((s,c)=>s+c.mult, 0);
   const mult = document.createElement('div');
   mult.className = 'lightning-mult';
-  mult.textContent = '×' + card.mult;
+  mult.textContent = '×' + totalMult;
   el.appendChild(mult);
 }
 let dealerHoleHidden = true;
@@ -1108,7 +1613,7 @@ let insuranceOffered = false;
 let insuranceBet = 0;
 let insuranceResolved = false;
 
-let bacBets = { player: 0, banker: 0, tie: 0 };
+let bacBets = { player: 0, banker: 0, tie: 0, ppair: 0, bpair: 0, dragon: 0 };
 let bacSelectedTarget = 'player';
 let bacRoundActive = false;
 let bacHistory = [];
@@ -1199,10 +1704,13 @@ const insNo = document.getElementById('insNo');
 function setMessage(msg){ messageEl.textContent = msg; }
 function updateHud(){
   balanceVal.textContent = fmt(balance);
+  balanceVal.classList.toggle('negative', balance < 0);
+  const betStatEl = document.getElementById('betStat');
+  if(betStatEl && betStatEl.classList.contains('win-mode')) return;
   const bacEl = document.getElementById('bacBottom');
   const slotEl = document.getElementById('slotBottom');
   if(bacEl && bacEl.style.display !== 'none'){
-    betVal.textContent = fmt(bacBets.player + bacBets.banker + bacBets.tie);
+    betVal.textContent = fmt(bacTotalBet());
   } else if(slotEl && slotEl.style.display !== 'none'){
     betVal.textContent = fmt(slotBet);
   } else {
@@ -1239,6 +1747,108 @@ function pushBjHistory(entry){
   bjHistory.push(entry);
   if(bjHistory.length > BJ_HISTORY_MAX) bjHistory.shift();
   renderBjHistory();
+  renderBjWinratePie();
+}
+function renderBjWinratePie(){
+  const pie = document.getElementById('bjWinratePie');
+  const legend = document.getElementById('bjWinrateLegend');
+  if(!pie || !legend) return;
+  const total = bjHistory.length;
+  if(total === 0){
+    pie.style.background = 'rgba(255,255,255,0.15)';
+    legend.innerHTML = '';
+    return;
+  }
+  const wins = bjHistory.filter(e=>e.win==='win').length;
+  const loses = bjHistory.filter(e=>e.win==='lose').length;
+  const draws = total - wins - loses;
+  const wPct = wins/total*100, lPct = loses/total*100, dPct = draws/total*100;
+  const wDeg = wPct*3.6, lDeg = lPct*3.6;
+  pie.style.background = `conic-gradient(#6dffb0 0deg ${wDeg}deg, #ff6b60 ${wDeg}deg ${wDeg+lDeg}deg, #f0e2ae ${wDeg+lDeg}deg 360deg)`;
+  legend.innerHTML =
+    `<div><span class="lg-win">WIN</span><span>${wPct.toFixed(0)}%</span></div>` +
+    `<div><span class="lg-lose">LOSE</span><span>${lPct.toFixed(0)}%</span></div>` +
+    `<div><span class="lg-draw">DRAW</span><span>${dPct.toFixed(0)}%</span></div>`;
+}
+function showBjResultOverlay(netProfit, grandTotal, breakdown){
+  const overlay = document.getElementById('bjResultOverlay');
+  const textEl = document.getElementById('bjResultWord');
+  const payEl = document.getElementById('bjResultPayout');
+  const bdEl = document.getElementById('bjResultBreakdown');
+  if(!overlay) return;
+  overlay.classList.remove('win','lose','draw');
+  if(netProfit > 0){
+    textEl.textContent = 'WIN';
+    overlay.classList.add('win');
+  } else if(netProfit < 0){
+    textEl.textContent = 'LOSE';
+    overlay.classList.add('lose');
+  } else {
+    textEl.textContent = 'DRAW';
+    overlay.classList.add('draw');
+  }
+  if(bdEl) renderBreakdownList(bdEl, breakdown);
+  if(grandTotal > 0){
+    payEl.textContent = '+' + fmt(grandTotal);
+    payEl.style.display = 'block';
+  } else {
+    payEl.style.display = 'none';
+  }
+  overlay.classList.add('show');
+  clearTimeout(overlay._t);
+}
+function hideBjResultOverlay(){
+  const overlay = document.getElementById('bjResultOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('show');
+  clearTimeout(overlay._t);
+}
+function renderBreakdownList(bdEl, breakdown){
+  if(!bdEl) return;
+  bdEl.innerHTML = '';
+  (breakdown || []).forEach(b => {
+    const line = document.createElement('div');
+    const rm = Math.round((b.returnMult) * 100) / 100;
+    const lmTag = (b.lmValue && b.lmValue > 1) ? ` (⚡×${b.lmValue})` : '';
+    line.textContent = `${b.label} ${fmt(b.stake)} × ${rm}${lmTag} = ${fmt(b.total)}`;
+    if(b.lmValue && b.lmValue > 1) line.classList.add('bd-lightning');
+    bdEl.appendChild(line);
+  });
+}
+function showBacResultOverlay(winner, payout, breakdown){
+  const overlay = document.getElementById('bacResultOverlay');
+  const textEl = document.getElementById('bacResultWord');
+  const payEl = document.getElementById('bacResultPayout');
+  const bdEl = document.getElementById('bacResultBreakdown');
+  if(!overlay) return;
+  overlay.classList.remove('bac-player','bac-banker','bac-tie');
+  if(winner === 'player'){
+    textEl.textContent = 'PLAYER';
+    overlay.classList.add('bac-player');
+  } else if(winner === 'banker'){
+    textEl.textContent = 'BANKER';
+    overlay.classList.add('bac-banker');
+  } else {
+    textEl.textContent = 'TIE';
+    overlay.classList.add('bac-tie');
+  }
+  if(bdEl){
+    renderBreakdownList(bdEl, breakdown);
+  }
+  if(payout > 0){
+    payEl.textContent = '+' + fmt(payout);
+    payEl.style.display = 'block';
+  } else {
+    payEl.style.display = 'none';
+  }
+  overlay.classList.add('show');
+  clearTimeout(overlay._t);
+}
+function hideBacResultOverlay(){
+  const overlay = document.getElementById('bacResultOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('show');
+  clearTimeout(overlay._t);
 }
 function renderBjHistory(){
   if(!bjHistoryEl) return;
@@ -1282,13 +1892,8 @@ function renderPlayerHands(){
     const v = handValue(h.cards);
     label.innerHTML = `<span class="score">${v}</span>`;
 
-    const resultTag = document.createElement('div');
-    resultTag.className = 'hand-result-tag';
-    resultTag.textContent = resultText(h);
-
     wrap.appendChild(label);
     wrap.appendChild(cardsDiv);
-    wrap.appendChild(resultTag);
     playerHandsRow.appendChild(wrap);
   });
 }
@@ -1302,66 +1907,121 @@ function resultText(h){
 }
 
 // ---------- Betting ----------
+function updateSidebetSpots(){
+  document.getElementById('amtMain').textContent = fmt(bet);
+  document.getElementById('amtPP').textContent = fmt(bjSideBets.pp);
+  document.getElementById('amtTri').textContent = fmt(bjSideBets.tri);
+  dealBtn.disabled = bet <= 0;
+}
+document.querySelectorAll('.sidebet-spot').forEach(spot => {
+  spot.addEventListener('click', () => {
+    if(roundActive) return;
+    document.querySelectorAll('.sidebet-spot').forEach(s => s.classList.remove('selected'));
+    spot.classList.add('selected');
+    bjBetTarget = spot.dataset.target;
+  });
+});
 document.querySelectorAll('#betControls .chip[data-v]').forEach(chip => {
   chip.addEventListener('click', () => {
     if(roundActive) return;
+    hideBjResultOverlay();
+    hideWinFlash();
     const v = parseInt(chip.dataset.v,10);
-    if(v > balance - bet) { setMessage('残高が足りません'); return; }
-    bet += v;
+    if(bjBetTarget === 'main'){
+      bet += v;
+    } else {
+      const cap = Math.floor(bet / 2);
+      const key = bjBetTarget === 'pp' ? 'pp' : 'tri';
+      if(bjSideBets[key] + v > cap){
+        setMessage('サイドベットはメインの半分までです');
+        updateSidebetSpots();
+        return;
+      }
+      bjSideBets[key] += v;
+    }
     updateHud();
-    dealBtn.disabled = bet <= 0;
+    updateSidebetSpots();
   });
 });
 document.getElementById('clearBet').addEventListener('click', () => {
   if(roundActive) return;
+  hideBjResultOverlay();
+  hideWinFlash();
   bet = 0;
+  bjSideBets = { pp:0, tri:0 };
   updateHud();
-  dealBtn.disabled = true;
+  updateSidebetSpots();
 });
 document.getElementById('allInBet').addEventListener('click', () => {
   if(roundActive) return;
   if(balance <= 0){ setMessage('残高がありません'); return; }
-  bet = balance;
+  hideBjResultOverlay();
+  hideWinFlash();
+  if(bjBetTarget === 'main'){
+    bet = balance;
+  } else {
+    const cap = Math.floor(bet / 2);
+    if(cap <= 0){ setMessage('サイドベットはメインの半分までです'); return; }
+    const key = bjBetTarget === 'pp' ? 'pp' : 'tri';
+    bjSideBets[key] = Math.min(balance, cap);
+  }
   updateHud();
-  dealBtn.disabled = bet <= 0;
+  updateSidebetSpots();
 });
 document.getElementById('bjLightningBtn').addEventListener('click', () => {
   if(roundActive) return;
   bjLightning = !bjLightning;
   document.getElementById('bjLightningBtn').classList.toggle('active', bjLightning);
-  if(!bjLightning) renderLightningInfo('bjLightningInfo', null);
+  bjLightningCards = null;
+  if(bjLightning) renderLightningBack('bjLightningInfo');
+  else renderLightningOff('bjLightningInfo');
 });
 document.getElementById('doubleLastBet').addEventListener('click', () => {
   if(roundActive) return;
-  if(lastBet <= 0){ setMessage('前回のベットがありません'); return; }
-  if(lastBet > balance - bet){ setMessage('残高が足りません'); return; }
+  const lastTotal = lastBet + lastBjSideBets.pp + lastBjSideBets.tri;
+  if(lastTotal <= 0){ setMessage('前回のベットがありません'); return; }
+  hideBjResultOverlay();
+  hideWinFlash();
   bet += lastBet;
+  bjSideBets.pp += lastBjSideBets.pp;
+  bjSideBets.tri += lastBjSideBets.tri;
   updateHud();
-  dealBtn.disabled = bet <= 0;
+  updateSidebetSpots();
 });
 document.getElementById('x2Bet').addEventListener('click', () => {
   if(roundActive) return;
   if(bet <= 0){ setMessage('ベットがありません'); return; }
-  if(bet > balance - bet){ setMessage('残高が足りません'); return; }
+  hideBjResultOverlay();
+  hideWinFlash();
   bet *= 2;
   updateHud();
-  dealBtn.disabled = bet <= 0;
+  updateSidebetSpots();
 });
 
 // ---------- Round flow ----------
 dealBtn.addEventListener('click', startRound);
 
 function startRound(){
-  if(bet <= 0 || bet > balance) return;
+  if(bet <= 0) return;
+  hideBjResultOverlay();
+  hideWinFlash();
   lastBet = bet;
-  balance -= bet;
-  bjLightningCard = null;
+  lastBjSideBets = { pp: bjSideBets.pp, tri: bjSideBets.tri };
+  bjLightningCards = null;
+  const sideBetTotal = bjSideBets.pp + bjSideBets.tri;
+  let charge = bet + sideBetTotal;
   if(bjLightning){
     const fee = Math.ceil(bet * 0.25);
-    balance -= fee;
-    bjLightningCard = drawLightningCard();
+    charge += fee;
+    flashBalanceFee(fee);
+    if(Math.random() < 0.5){
+      bjLightningCards = drawLightningCards();
+      renderLightningReveal('bjLightningInfo', bjLightningCards);
+    } else {
+      renderLightningBack('bjLightningInfo');
+    }
   }
-  renderLightningInfo('bjLightningInfo', bjLightningCard);
+  balance -= charge;
   updateHud();
   roundActive = true;
   insuranceOffered = false;
@@ -1374,12 +2034,40 @@ function startRound(){
   playerHands = [{ cards:[drawCard(), drawCard()], bet: bet, status:'playing', result:null, doubled:false }];
   activeHandIndex = 0;
 
-  betControls.style.display = 'none';
+  betControls.style.visibility = 'hidden';
   actionRow.style.display = 'flex';
 
   renderDealer(false);
   renderPlayerHands();
-  setMessage('あなたのターンです');
+
+  let sideMsg = '';
+  bjBreakdown = [];
+  const lmSide = (bjLightningCards && bjLightningCards.length) ? bjLightningCards.reduce((s,c)=>s+c.mult,0) : 1;
+  if(bjSideBets.pp > 0){
+    const pp = evalPerfectPair(playerHands[0].cards);
+    if(pp){
+      const win = bjSideBets.pp * pp.mult * lmSide;
+      balance += win + bjSideBets.pp;
+      sideMsg += ` [PP: ${pp.name} +${fmt(win)}]`;
+      bjBreakdown.push({ label:'PP:'+pp.name, stake: bjSideBets.pp, returnMult: pp.mult*lmSide+1, lmValue: lmSide, total: win + bjSideBets.pp });
+    } else {
+      sideMsg += ' [PP: はずれ]';
+    }
+  }
+  if(bjSideBets.tri > 0){
+    const tri = eval21plus3([playerHands[0].cards[0], playerHands[0].cards[1], dealerHand[0]]);
+    if(tri){
+      const win = bjSideBets.tri * tri.mult * lmSide;
+      balance += win + bjSideBets.tri;
+      sideMsg += ` [21+3: ${tri.name} +${fmt(win)}]`;
+      bjBreakdown.push({ label:'21+3:'+tri.name, stake: bjSideBets.tri, returnMult: tri.mult*lmSide+1, lmValue: lmSide, total: win + bjSideBets.tri });
+    } else {
+      sideMsg += ' [21+3: はずれ]';
+    }
+  }
+  if(sideMsg) updateHud();
+
+  setMessage('あなたのターンです' + sideMsg);
 
   const pv = handValue(playerHands[0].cards);
   const dUp = dealerHand[0];
@@ -1452,7 +2140,9 @@ function updateActionButtons(){
 }
 
 hitBtn.addEventListener('click', () => {
+  if(!roundActive || playerHands.length === 0) return;
   const h = currentHand();
+  if(!h || h.status !== 'playing') return;
   h.cards.push(drawCard());
   const v = handValue(h.cards);
   renderPlayerHands();
@@ -1467,13 +2157,17 @@ hitBtn.addEventListener('click', () => {
 });
 
 stayBtn.addEventListener('click', () => {
-  currentHand().status = 'stand';
+  if(!roundActive || playerHands.length === 0) return;
+  const h = currentHand();
+  if(!h || h.status !== 'playing') return;
+  h.status = 'stand';
   advanceHand();
 });
 
 doubleBtn.addEventListener('click', () => {
+  if(!roundActive || playerHands.length === 0) return;
   const h = currentHand();
-  if(!canDouble(h)) return;
+  if(!h || !canDouble(h)) return;
   balance -= h.bet;
   h.bet *= 2;
   h.doubled = true;
@@ -1486,8 +2180,9 @@ doubleBtn.addEventListener('click', () => {
 });
 
 splitBtn.addEventListener('click', () => {
+  if(!roundActive || playerHands.length === 0) return;
   const h = currentHand();
-  if(!canSplit(h)) return;
+  if(!h || !canSplit(h)) return;
   balance -= h.bet;
   updateHud();
   const newHand = { cards:[h.cards.pop()], bet: h.bet, status:'playing', result:null, doubled:false };
@@ -1558,21 +2253,27 @@ function finishRound(dealerHadBJ){
     }
     const playerBJ = h.result === 'blackjack' && h.cards.length === 2;
 
-    const lm = bjLightningCard ? bjLightningCard.mult : null;
+    const lm = (bjLightningCards && bjLightningCards.length) ? bjLightningCards.reduce((s,c)=>s+c.mult,0) : null;
     if(playerBJ && dealerBJ){
       h.result = 'push';
       totalDelta += h.bet;
     } else if(playerBJ){
       h.result = 'blackjack';
-      totalDelta += h.bet + (lm ? h.bet * lm : Math.floor(h.bet * 1.5));
+      const winAmt = lm ? h.bet * lm : Math.floor(h.bet * 1.5);
+      totalDelta += h.bet + winAmt;
+      bjBreakdown.push({ label:'Blackjack', stake: h.bet, returnMult: lm ? (lm+1) : 2.5, lmValue: lm || 1, total: h.bet + winAmt });
     } else if(dealerBJ){
       h.result = 'lose';
     } else if(dealerBust){
       h.result = 'win';
-      totalDelta += h.bet + (lm ? h.bet * lm : h.bet);
+      const winAmt = lm ? h.bet * lm : h.bet;
+      totalDelta += h.bet + winAmt;
+      bjBreakdown.push({ label:'Win', stake: h.bet, returnMult: lm ? (lm+1) : 2, lmValue: lm || 1, total: h.bet + winAmt });
     } else if(pv > dv){
       h.result = 'win';
-      totalDelta += h.bet + (lm ? h.bet * lm : h.bet);
+      const winAmt = lm ? h.bet * lm : h.bet;
+      totalDelta += h.bet + winAmt;
+      bjBreakdown.push({ label:'Win', stake: h.bet, returnMult: lm ? (lm+1) : 2, lmValue: lm || 1, total: h.bet + winAmt });
     } else if(pv < dv){
       h.result = 'lose';
     } else {
@@ -1587,6 +2288,12 @@ function finishRound(dealerHadBJ){
   updateHud();
   renderPlayerHands();
 
+  const totalBet = playerHands.reduce((s,h)=>s+h.bet,0);
+  const netProfit = totalDelta - totalBet;
+  const grandTotal = bjBreakdown.reduce((s,b)=>s+b.total, 0);
+  showBjResultOverlay(netProfit, grandTotal, bjBreakdown);
+  flashWin(grandTotal);
+
   const wins = playerHands.filter(h=>h.result==='win'||h.result==='blackjack').length;
   const loses = playerHands.filter(h=>h.result==='lose').length;
   const pushes = playerHands.filter(h=>h.result==='push').length;
@@ -1599,19 +2306,12 @@ function finishRound(dealerHadBJ){
 
   roundActive = false;
   bet = 0;
+  bjSideBets = { pp:0, tri:0 };
   updateHud();
-  betControls.style.display = 'flex';
-  dealBtn.disabled = bet <= 0;
+  updateSidebetSpots();
+  betControls.style.visibility = 'visible';
   actionRow.style.display = 'none';
   insuranceBanner.style.display = 'none';
-
-  if(balance <= 0){
-    setTimeout(() => {
-      balance = 10000;
-      updateHud();
-      setMessage('残高が尽きたため 10000 でリセットしました');
-    }, 1200);
-  }
 }
 
 updateHud();
@@ -1701,6 +2401,30 @@ const PAYTABLE_KEYS = ['replay','bell','melon','cherry','bar','seven'];
 
 function setSlotMessage(msg){ slotMessageEl.textContent = msg; }
 
+let slotHistory = [];
+const SLOT_HISTORY_MAX = 20;
+function pushSlotHistory(entry){
+  slotHistory.push(entry);
+  if(slotHistory.length > SLOT_HISTORY_MAX) slotHistory.shift();
+  renderSlotHistory();
+}
+function renderSlotHistory(){
+  const el = document.getElementById('slotHistory');
+  if(!el) return;
+  el.innerHTML = '';
+  slotHistory.forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'sh-row';
+    const icon = document.createElement('span');
+    icon.textContent = e.win ? '⭕' : (e.label === 'REPLAY' ? '🔄' : '❌');
+    const label = document.createElement('span');
+    label.className = e.win ? 'sh-win' : 'sh-lose';
+    label.textContent = e.label;
+    row.appendChild(icon);
+    row.appendChild(label);
+    el.appendChild(row);
+  });
+}
 function renderPaytable(){
   const table = UNIFIED_TABLE;
   document.getElementById('payTitle').textContent = '配当確率（還元率 約97%）';
@@ -1717,7 +2441,7 @@ function renderPaytable(){
 renderPaytable();
 
 function updateSlotBetControls(){
-  slotSpinBtn.disabled = slotBet <= 0 || slotSpinning || slotBet > balance;
+  slotSpinBtn.disabled = slotBet <= 0 || slotSpinning;
   document.querySelectorAll('#slotBetControls .chip[data-v]').forEach(c => {
     c.classList.toggle('disabled', slotSpinning);
   });
@@ -1727,8 +2451,8 @@ function updateSlotBetControls(){
 document.querySelectorAll('#slotBetControls .chip[data-v]').forEach(chip => {
   chip.addEventListener('click', () => {
     if(slotSpinning) return;
+    hideWinFlash();
     const v = parseInt(chip.dataset.v, 10);
-    if(v > balance - slotBet){ setSlotMessage('残高が足りません'); return; }
     slotBet += v;
     betVal.textContent = fmt(slotBet);
     updateSlotBetControls();
@@ -1736,6 +2460,7 @@ document.querySelectorAll('#slotBetControls .chip[data-v]').forEach(chip => {
 });
 document.getElementById('slotClearBet').addEventListener('click', () => {
   if(slotSpinning) return;
+  hideWinFlash();
   slotBet = 0;
   betVal.textContent = fmt(0);
   updateSlotBetControls();
@@ -1743,6 +2468,7 @@ document.getElementById('slotClearBet').addEventListener('click', () => {
 document.getElementById('slotAllInBet').addEventListener('click', () => {
   if(slotSpinning) return;
   if(balance <= 0){ setSlotMessage('残高がありません'); return; }
+  hideWinFlash();
   slotBet = balance;
   betVal.textContent = fmt(slotBet);
   updateSlotBetControls();
@@ -1750,7 +2476,7 @@ document.getElementById('slotAllInBet').addEventListener('click', () => {
 document.getElementById('slotDoubleLastBet').addEventListener('click', () => {
   if(slotSpinning) return;
   if(lastSlotBet <= 0){ setSlotMessage('前回のベットがありません'); return; }
-  if(lastSlotBet > balance - slotBet){ setSlotMessage('残高が足りません'); return; }
+  hideWinFlash();
   slotBet += lastSlotBet;
   betVal.textContent = fmt(slotBet);
   updateSlotBetControls();
@@ -1758,7 +2484,7 @@ document.getElementById('slotDoubleLastBet').addEventListener('click', () => {
 document.getElementById('slotX2Bet').addEventListener('click', () => {
   if(slotSpinning) return;
   if(slotBet <= 0){ setSlotMessage('ベットがありません'); return; }
-  if(slotBet > balance - slotBet){ setSlotMessage('残高が足りません'); return; }
+  hideWinFlash();
   slotBet *= 2;
   betVal.textContent = fmt(slotBet);
   updateSlotBetControls();
@@ -1785,7 +2511,6 @@ function randomFillerSet(){
 
 slotSpinBtn.addEventListener('click', () => {
   if(slotBet <= 0 || slotSpinning) return;
-  if(slotBet > balance){ setSlotMessage('残高が足りません'); return; }
   lastSlotBet = slotBet;
   slotSpinning = true;
   balance -= slotBet;
@@ -1816,29 +2541,28 @@ slotSpinBtn.addEventListener('click', () => {
       balance += stake; // free respin: stake fully refunded
       updateHud();
       setSlotMessage('🔄 REPLAY！ベット無料でもう一度回せます');
+      pushSlotHistory({ win:false, label:'REPLAY' });
     } else if(outcome){
       const payout = stake * outcome.mult;
       balance += payout;
       updateHud();
       setSlotMessage(`${SYMBOL_NAMES[outcome.sym]} 揃い！ ${outcome.mult}倍 → +${payout}`);
+      flashWin(payout);
+      pushSlotHistory({ win:true, label:`${SYMBOL_NAMES[outcome.sym]} x${outcome.mult}` });
     } else {
       setSlotMessage('残念、はずれ — 次のベットをどうぞ');
+      pushSlotHistory({ win:false, label:'はずれ' });
     }
 
     // Bet resets every spin; player must select a chip or use rebet/x2.
     slotBet = 0;
-    betVal.textContent = fmt(slotBet);
+    const betStatEl = document.getElementById('betStat');
+    if(!betStatEl || !betStatEl.classList.contains('win-mode')){
+      betVal.textContent = fmt(slotBet);
+    }
     slotSpinning = false;
     renderPaytable();
     updateSlotBetControls();
-
-    if(balance <= 0){
-      setTimeout(() => {
-        balance = 10000;
-        updateHud();
-        setSlotMessage('残高が尽きたため 10000 でリセットしました');
-      }, 1200);
-    }
   }, 900);
 });
 
@@ -1855,7 +2579,7 @@ const bacDealBtn = document.getElementById('bacDealBtn');
 
 function setBacMessage(msg){ bacMessageEl.textContent = msg; }
 
-function bacTotalBet(){ return bacBets.player + bacBets.banker + bacBets.tie; }
+function bacTotalBet(){ return bacBets.player + bacBets.banker + bacBets.tie + bacBets.ppair + bacBets.bpair + bacBets.dragon; }
 
 const bacRoadEl = document.getElementById('bacRoad');
 const ROAD_COLS = 7, ROAD_ROWS = 20;
@@ -1900,12 +2624,39 @@ function renderBacRoad(){
     }
     bacRoadEl.appendChild(d);
   });
+  renderBacWinratePie();
+}
+function renderBacWinratePie(){
+  const pie = document.getElementById('bacWinratePie');
+  const legend = document.getElementById('bacWinrateLegend');
+  if(!pie || !legend) return;
+  const playerCount = bacHistory.filter(e=>e.type==='player').length;
+  const bankerCount = bacHistory.filter(e=>e.type==='banker').length;
+  const tieOnly = bacHistory.filter(e=>e.type==='tie').length;
+  const tieAttached = bacHistory.reduce((s,e)=>s+(e.ties||0), 0);
+  const tieCount = tieOnly + tieAttached;
+  const total = playerCount + bankerCount + tieCount;
+  if(total === 0){
+    pie.style.background = 'rgba(255,255,255,0.15)';
+    legend.innerHTML = '';
+    return;
+  }
+  const pPct = playerCount/total*100, bPct = bankerCount/total*100, tPct = tieCount/total*100;
+  const pDeg = pPct*3.6, bDeg = bPct*3.6;
+  pie.style.background = `conic-gradient(#7ec8ff 0deg ${pDeg}deg, #ff8a7a ${pDeg}deg ${pDeg+bDeg}deg, #6dffb0 ${pDeg+bDeg}deg 360deg)`;
+  legend.innerHTML =
+    `<div><span class="lg-player">P</span><span>${pPct.toFixed(0)}%</span></div>` +
+    `<div><span class="lg-banker">B</span><span>${bPct.toFixed(0)}%</span></div>` +
+    `<div><span class="lg-tie">T</span><span>${tPct.toFixed(0)}%</span></div>`;
 }
 
 function updateBacSpots(){
   document.getElementById('amtPlayer').textContent = bacBets.player;
   document.getElementById('amtBanker').textContent = bacBets.banker;
   document.getElementById('amtTie').textContent = bacBets.tie;
+  document.getElementById('amtPPair').textContent = bacBets.ppair;
+  document.getElementById('amtBPair').textContent = bacBets.bpair;
+  document.getElementById('amtDragon').textContent = bacBets.dragon;
   bacDealBtn.disabled = bacTotalBet() <= 0;
 }
 
@@ -1915,14 +2666,41 @@ document.querySelectorAll('.bac-spot').forEach(spot => {
     document.querySelectorAll('.bac-spot').forEach(s => s.classList.remove('selected'));
     spot.classList.add('selected');
     bacSelectedTarget = spot.dataset.target;
+    if(bacSelectedTarget === 'player'){
+      bacBets.banker = 0;
+    } else if(bacSelectedTarget === 'banker'){
+      bacBets.player = 0;
+    }
+    updateHud2();
+    updateBacSpots();
   });
 });
 
 document.querySelectorAll('#bacBetControls .chip[data-v]').forEach(chip => {
   chip.addEventListener('click', () => {
     if(bacRoundActive) return;
+    hideBacResultOverlay();
+    hideWinFlash();
     const v = parseInt(chip.dataset.v, 10);
-    if(v > balance - bacTotalBet()){ setBacMessage('残高が足りません'); return; }
+    const sideTargets = ['ppair','bpair','dragon'];
+    if(sideTargets.includes(bacSelectedTarget)){
+      const mainTotal = bacBets.player + bacBets.banker + bacBets.tie;
+      const cap = Math.floor(mainTotal / 2);
+      if(bacBets[bacSelectedTarget] + v > cap){
+        setBacMessage('サイドベットはメインの半分までです');
+        updateBacSpots();
+        return;
+      }
+      bacBets[bacSelectedTarget] += v;
+      updateHud2();
+      updateBacSpots();
+      return;
+    }
+    if(bacSelectedTarget === 'player'){
+      bacBets.banker = 0;
+    } else if(bacSelectedTarget === 'banker'){
+      bacBets.player = 0;
+    }
     bacBets[bacSelectedTarget] += v;
     updateHud2();
     updateBacSpots();
@@ -1930,7 +2708,9 @@ document.querySelectorAll('#bacBetControls .chip[data-v]').forEach(chip => {
 });
 document.getElementById('bacClearBet').addEventListener('click', () => {
   if(bacRoundActive) return;
-  bacBets = { player:0, banker:0, tie:0 };
+  hideBacResultOverlay();
+  hideWinFlash();
+  bacBets = { player:0, banker:0, tie:0, ppair:0, bpair:0, dragon:0 };
   updateHud2();
   updateBacSpots();
 });
@@ -1938,25 +2718,43 @@ document.getElementById('bacLightningBtn').addEventListener('click', () => {
   if(bacRoundActive) return;
   bacLightning = !bacLightning;
   document.getElementById('bacLightningBtn').classList.toggle('active', bacLightning);
-  if(!bacLightning) renderLightningInfo('bacLightningInfo', null);
+  bacLightningCards = null;
+  if(bacLightning) renderLightningBack('bacLightningInfo');
+  else renderLightningOff('bacLightningInfo');
 });
 document.getElementById('bacAllInBet').addEventListener('click', () => {
   if(bacRoundActive) return;
   if(balance <= 0){ setBacMessage('残高がありません'); return; }
-  bacBets = { player:0, banker:0, tie:0 };
+  hideBacResultOverlay();
+  hideWinFlash();
+  const sideTargets = ['ppair','bpair','dragon'];
+  if(sideTargets.includes(bacSelectedTarget)){
+    const mainTotal = bacBets.player + bacBets.banker + bacBets.tie;
+    const cap = Math.floor(mainTotal / 2);
+    if(cap <= 0){ setBacMessage('サイドベットはメインの半分までです'); return; }
+    bacBets[bacSelectedTarget] = Math.min(balance, cap);
+    updateHud2();
+    updateBacSpots();
+    return;
+  }
+  bacBets = { player:0, banker:0, tie:0, ppair:0, bpair:0, dragon:0 };
   bacBets[bacSelectedTarget] = balance;
   updateHud2();
   updateBacSpots();
 });
 document.getElementById('bacDoubleLastBet').addEventListener('click', () => {
   if(bacRoundActive) return;
-  const lastTotal = lastBacBets.player + lastBacBets.banker + lastBacBets.tie;
+  const lastTotal = lastBacBets.player + lastBacBets.banker + lastBacBets.tie + lastBacBets.ppair + lastBacBets.bpair + lastBacBets.dragon;
   if(lastTotal <= 0){ setBacMessage('前回のベットがありません'); return; }
-  if(lastTotal > balance - bacTotalBet()){ setBacMessage('残高が足りません'); return; }
+  hideBacResultOverlay();
+  hideWinFlash();
   bacBets = {
     player: bacBets.player + lastBacBets.player,
     banker: bacBets.banker + lastBacBets.banker,
-    tie: bacBets.tie + lastBacBets.tie
+    tie: bacBets.tie + lastBacBets.tie,
+    ppair: bacBets.ppair + lastBacBets.ppair,
+    bpair: bacBets.bpair + lastBacBets.bpair,
+    dragon: bacBets.dragon + lastBacBets.dragon
   };
   updateHud2();
   updateBacSpots();
@@ -1965,13 +2763,23 @@ document.getElementById('bacX2Bet').addEventListener('click', () => {
   if(bacRoundActive) return;
   const total = bacTotalBet();
   if(total <= 0){ setBacMessage('ベットがありません'); return; }
-  if(total > balance - total){ setBacMessage('残高が足りません'); return; }
-  bacBets = { player: bacBets.player * 2, banker: bacBets.banker * 2, tie: bacBets.tie * 2 };
+  hideBacResultOverlay();
+  hideWinFlash();
+  bacBets = {
+    player: bacBets.player * 2,
+    banker: bacBets.banker * 2,
+    tie: bacBets.tie * 2,
+    ppair: bacBets.ppair * 2,
+    bpair: bacBets.bpair * 2,
+    dragon: bacBets.dragon * 2
+  };
   updateHud2();
   updateBacSpots();
 });
 
 function updateHud2(){
+  const betStatEl = document.getElementById('betStat');
+  if(betStatEl && betStatEl.classList.contains('win-mode')) return;
   betVal.textContent = fmt(bacGameActiveTab() ? bacTotalBet() : bet);
 }
 function bacGameActiveTab(){
@@ -1997,16 +2805,23 @@ bacDealBtn.addEventListener('click', playBaccaratRound);
 
 function playBaccaratRound(){
   if(bacTotalBet() <= 0) return;
-  lastBacBets = { player: bacBets.player, banker: bacBets.banker, tie: bacBets.tie };
+  hideBacResultOverlay();
+  hideWinFlash();
+  lastBacBets = { player: bacBets.player, banker: bacBets.banker, tie: bacBets.tie, ppair: bacBets.ppair, bpair: bacBets.bpair, dragon: bacBets.dragon };
   const stake = bacTotalBet();
   balance -= stake;
-  bacLightningCard = null;
+  bacLightningCards = null;
   if(bacLightning){
     const fee = Math.ceil(stake * 0.25);
     balance -= fee;
-    bacLightningCard = drawLightningCard();
+    flashBalanceFee(fee);
+    if(Math.random() < 0.5){
+      bacLightningCards = drawLightningCards();
+      renderLightningReveal('bacLightningInfo', bacLightningCards);
+    } else {
+      renderLightningBack('bacLightningInfo');
+    }
   }
-  renderLightningInfo('bacLightningInfo', bacLightningCard);
   bacRoundActive = true;
   bacBetControls.querySelectorAll('.chip, .deal-btn').forEach(el => el.style.pointerEvents = 'none');
   bacDealBtn.disabled = true;
@@ -2017,6 +2832,31 @@ function playBaccaratRound(){
 
   const playerCards = [drawCard(), drawCard()];
   const bankerCards = [drawCard(), drawCard()];
+
+  let bacSideMsg = '';
+  let bacBreakdown = [];
+  const lmSide = (bacLightningCards && bacLightningCards.length) ? bacLightningCards.reduce((s,c)=>s+c.mult,0) : 1;
+  if(bacBets.ppair > 0){
+    if(rankOf(playerCards[0]) === rankOf(playerCards[1])){
+      const win = bacBets.ppair * 11 * lmSide;
+      balance += win + bacBets.ppair;
+      bacSideMsg += ` [P.Pair +${fmt(win)}]`;
+      bacBreakdown.push({ label:'P.Pair', stake: bacBets.ppair, returnMult: 11*lmSide+1, lmValue: lmSide, total: win + bacBets.ppair });
+    } else {
+      bacSideMsg += ' [P.Pair はずれ]';
+    }
+  }
+  if(bacBets.bpair > 0){
+    if(rankOf(bankerCards[0]) === rankOf(bankerCards[1])){
+      const win = bacBets.bpair * 11 * lmSide;
+      balance += win + bacBets.bpair;
+      bacSideMsg += ` [B.Pair +${fmt(win)}]`;
+      bacBreakdown.push({ label:'B.Pair', stake: bacBets.bpair, returnMult: 11*lmSide+1, lmValue: lmSide, total: win + bacBets.bpair });
+    } else {
+      bacSideMsg += ' [B.Pair はずれ]';
+    }
+  }
+  if(bacSideMsg) updateHud();
 
   bankerScoreEl.textContent = '';
   bacPlayerScoreEl.textContent = '';
@@ -2097,23 +2937,69 @@ function playBaccaratRound(){
 
     let payout = 0;
     let msgParts = [];
-    const lm = bacLightningCard ? bacLightningCard.mult : 1;
+    const lm = (bacLightningCards && bacLightningCards.length) ? bacLightningCards.reduce((s,c)=>s+c.mult,0) : 1;
 
     if(winner === 'tie'){
-      if(bacBets.tie > 0){ payout += bacBets.tie + bacBets.tie * 8 * lm; msgParts.push('タイ的中 (8倍配当)'); }
+      if(bacBets.tie > 0){
+        const tieReturn = bacBets.tie + bacBets.tie * 8 * lm;
+        payout += tieReturn;
+        msgParts.push('タイ的中 (8倍配当)');
+        bacBreakdown.push({ label:'Tie', stake: bacBets.tie, returnMult: 8*lm+1, lmValue: lm, total: tieReturn });
+      }
       if(bacBets.player > 0) payout += bacBets.player;
       if(bacBets.banker > 0) payout += bacBets.banker;
       if(bacBets.tie === 0) msgParts.push('タイ（プレイヤー/バンカーは返金）');
     } else if(winner === 'player'){
-      if(bacBets.player > 0){ payout += bacBets.player + bacBets.player * lm; msgParts.push('プレイヤー勝利！'); }
+      if(bacBets.player > 0){
+        const playerReturn = bacBets.player + bacBets.player * lm;
+        payout += playerReturn;
+        msgParts.push('プレイヤー勝利！');
+        bacBreakdown.push({ label:'Player', stake: bacBets.player, returnMult: 1*lm+1, lmValue: lm, total: playerReturn });
+      }
       else msgParts.push('プレイヤーの勝ち（ベットなし）');
     } else {
-      if(bacBets.banker > 0){ payout += bacBets.banker + Math.floor(bacBets.banker * 0.95 * lm); msgParts.push('バンカー勝利！(5%手数料)'); }
+      if(bacBets.banker > 0){
+        const bankerReturn = bacBets.banker + Math.floor(bacBets.banker * 0.95 * lm);
+        payout += bankerReturn;
+        msgParts.push('バンカー勝利！(5%手数料)');
+        bacBreakdown.push({ label:'Banker', stake: bacBets.banker, returnMult: Math.round((0.95*lm+1)*100)/100, lmValue: lm, total: bankerReturn });
+      }
       else msgParts.push('バンカーの勝ち（ベットなし）');
     }
 
     balance += payout;
     updateHud();
+
+    if(bacBets.dragon > 0){
+      if(winner === 'tie'){
+        balance += bacBets.dragon;
+        bacSideMsg += ' [Dragon: プッシュ]';
+      } else {
+        const mainBetMatchesWinner = (winner === 'player' && bacBets.player > 0) || (winner === 'banker' && bacBets.banker > 0);
+        if(!mainBetMatchesWinner){
+          bacSideMsg += ' [Dragon はずれ（メインベットの勝ちのみ有効）]';
+        } else {
+          const margin = Math.abs(pFinal - bFinal);
+          const natural = playerCards.length === 2 && bankerCards.length === 2 && (pFinal >= 8 || bFinal >= 8);
+          const dragonTable = {4:1, 5:2, 6:4, 7:6, 8:10, 9:30};
+          const dragonMult = margin >= 4 ? dragonTable[margin] : (natural ? 1 : 0);
+          if(dragonMult > 0){
+            const win = bacBets.dragon * dragonMult * lm;
+            const dragonReturn = win + bacBets.dragon;
+            balance += dragonReturn;
+            bacSideMsg += ` [Dragon x${dragonMult} +${fmt(win)}]`;
+            bacBreakdown.push({ label:'Dragon', stake: bacBets.dragon, returnMult: dragonMult*lm+1, lmValue: lm, total: dragonReturn });
+          } else {
+            bacSideMsg += ' [Dragon はずれ]';
+          }
+        }
+      }
+      updateHud();
+    }
+
+    const grandTotal = bacBreakdown.reduce((s,b)=>s+b.total, 0);
+    showBacResultOverlay(winner, grandTotal, bacBreakdown);
+    flashWin(grandTotal);
 
     if(winner === 'tie'){
       if(bacHistory.length > 0){
@@ -2126,21 +3012,13 @@ function playBaccaratRound(){
     }
     renderBacRoad();
 
-    setBacMessage(`Player ${pFinal} - Banker ${bFinal}  |  ` + msgParts.join(' ') + '  |  次のベットをどうぞ');
+    setBacMessage(`Player ${pFinal} - Banker ${bFinal}  |  ` + msgParts.join(' ') + bacSideMsg + '  |  次のベットをどうぞ');
 
     bacRoundActive = false;
-    bacBets = { player:0, banker:0, tie:0 };
+    bacBets = { player:0, banker:0, tie:0, ppair:0, bpair:0, dragon:0 };
     updateHud2();
     updateBacSpots();
     bacBetControls.querySelectorAll('.chip, .deal-btn').forEach(el => el.style.pointerEvents = '');
-
-    if(balance <= 0){
-      setTimeout(() => {
-        balance = 10000;
-        updateHud();
-        setBacMessage('残高が尽きたため 10000 でリセットしました');
-      }, 1200);
-    }
   }
 }
 </script>
