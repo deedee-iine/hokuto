@@ -1150,10 +1150,10 @@
   }
   .slot-machine{
     position: absolute;
-    top: 24.2dvh;
-    height: 15.9dvh;
-    left: 6.3%;
-    width: 53.1%;
+    top: 25.6dvh;
+    height: 9.2dvh;
+    left: 5%;
+    width: 55.5%;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -1187,32 +1187,30 @@
   }
   .slot-history{
     position: absolute;
-    top: 41dvh;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow-y: auto;
-    max-width: 340px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 4px 8px;
-    display:flex;
-    flex-direction:column;
-    gap: 2px;
+    top: 43dvh;
+    left: 3%;
+    width: 40%;
     z-index: 1;
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    grid-auto-flow: column;
+    gap: 1.5px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(212,175,90,0.35);
+    border-radius: 6px;
+    padding: 3px;
   }
-  .slot-history .sh-row{
+  .slot-history .sh-cell{
+    aspect-ratio: 1 / 1;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap: 6px;
-    font-size: 0.6rem;
-    background: rgba(0,0,0,0.35);
-    border-radius: 5px;
-    padding: 2px 6px;
+    font-size: 0.42rem;
+    line-height:1;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.05);
   }
-  .slot-history .sh-win{ color:#6dffb0; font-weight:bold; }
-  .slot-history .sh-lose{ color:#8a8a8a; }
 </style>
 </head>
 <body>
@@ -1335,7 +1333,15 @@
           <div class="slot-reel" id="reel3" data-sym="seven"></div>
         </div>
       </div>
-      <div class="slot-history" id="slotHistory"></div>
+      <div class="slot-history" id="slotHistory">
+        <div class="sh-col" data-cat="lose"><div class="sh-col-label">❌</div><div class="sh-col-stack" id="shLose"></div></div>
+        <div class="sh-col" data-cat="bell"><div class="sh-col-label">🔔</div><div class="sh-col-stack" id="shBell"></div></div>
+        <div class="sh-col" data-cat="replay"><div class="sh-col-label">🔄</div><div class="sh-col-stack" id="shReplay"></div></div>
+        <div class="sh-col" data-cat="melon"><div class="sh-col-label">🍉</div><div class="sh-col-stack" id="shMelon"></div></div>
+        <div class="sh-col" data-cat="cherry"><div class="sh-col-label">🍒</div><div class="sh-col-stack" id="shCherry"></div></div>
+        <div class="sh-col" data-cat="bar"><div class="sh-col-label">⬛</div><div class="sh-col-stack" id="shBar"></div></div>
+        <div class="sh-col" data-cat="seven"><div class="sh-col-label">7️⃣</div><div class="sh-col-stack" id="shSeven"></div></div>
+      </div>
     </div>
   </div>
 
@@ -2401,8 +2407,17 @@ const PAYTABLE_KEYS = ['replay','bell','melon','cherry','bar','seven'];
 
 function setSlotMessage(msg){ slotMessageEl.textContent = msg; }
 
+const SLOT_ICON_MAP = {
+  lose: '❌',
+  bell: '🔔',
+  replay: '🔄',
+  melon: '🍉',
+  cherry: '🍒',
+  bar: '⬛',
+  seven: '7️⃣'
+};
 let slotHistory = [];
-const SLOT_HISTORY_MAX = 20;
+const SLOT_HISTORY_MAX = 100;
 function pushSlotHistory(entry){
   slotHistory.push(entry);
   if(slotHistory.length > SLOT_HISTORY_MAX) slotHistory.shift();
@@ -2413,16 +2428,10 @@ function renderSlotHistory(){
   if(!el) return;
   el.innerHTML = '';
   slotHistory.forEach(e => {
-    const row = document.createElement('div');
-    row.className = 'sh-row';
-    const icon = document.createElement('span');
-    icon.textContent = e.win ? '⭕' : (e.label === 'REPLAY' ? '🔄' : '❌');
-    const label = document.createElement('span');
-    label.className = e.win ? 'sh-win' : 'sh-lose';
-    label.textContent = e.label;
-    row.appendChild(icon);
-    row.appendChild(label);
-    el.appendChild(row);
+    const cell = document.createElement('div');
+    cell.className = 'sh-cell';
+    cell.textContent = SLOT_ICON_MAP[e.key] || '❌';
+    el.appendChild(cell);
   });
 }
 function renderPaytable(){
@@ -2541,17 +2550,17 @@ slotSpinBtn.addEventListener('click', () => {
       balance += stake; // free respin: stake fully refunded
       updateHud();
       setSlotMessage('🔄 REPLAY！ベット無料でもう一度回せます');
-      pushSlotHistory({ win:false, label:'REPLAY' });
+      pushSlotHistory({ key:'replay' });
     } else if(outcome){
       const payout = stake * outcome.mult;
       balance += payout;
       updateHud();
       setSlotMessage(`${SYMBOL_NAMES[outcome.sym]} 揃い！ ${outcome.mult}倍 → +${payout}`);
       flashWin(payout);
-      pushSlotHistory({ win:true, label:`${SYMBOL_NAMES[outcome.sym]} x${outcome.mult}` });
+      pushSlotHistory({ key: outcome.sym });
     } else {
       setSlotMessage('残念、はずれ — 次のベットをどうぞ');
-      pushSlotHistory({ win:false, label:'はずれ' });
+      pushSlotHistory({ key:'lose' });
     }
 
     // Bet resets every spin; player must select a chip or use rebet/x2.
