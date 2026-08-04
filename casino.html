@@ -232,7 +232,7 @@
     position:relative;
   }
   #bjCenter > .zone-dealer{
-    flex: 0 0 79%;
+    flex: 0 0 84%;
     display:flex;
     flex-direction:column;
     justify-content:flex-end;
@@ -251,7 +251,6 @@
     flex-direction:column;
     justify-content:flex-start;
     margin-bottom:0;
-    position: relative;
   }
   .bj-main-badge{
     position: absolute;
@@ -699,6 +698,12 @@
     gap: 10px;
     flex-wrap: wrap;
   }
+  #dealerHandsRow{
+    position: absolute;
+    top: 70%;
+    left: 0;
+    right: 0;
+  }
   #playerHandsRow{
     margin-top: 34px;
   }
@@ -858,7 +863,7 @@
     font-weight:bold;
     border-color: rgba(255,255,255,0.7);
   }
-  .chip:disabled, .chip.disabled{ opacity:0.35; pointer-events:none; }
+  .chip:disabled, .chip.disabled{ opacity:1; filter: brightness(0.35) saturate(0.5); pointer-events:none; }
   .chip.selected{ box-shadow: 0 0 0 3px var(--gold-bright), 0 2px 4px rgba(0,0,0,0.35); transform: scale(1.06); }
 
   .action-row{
@@ -889,9 +894,12 @@
     gap: 16px;
     flex: 0 0 auto;
     visibility: hidden;
-    position: relative;
+    position: absolute;
+    top: 68%;
     z-index: 8;
   }
+  #actionColLeft{ left: 2%; }
+  #actionColRight{ right: 2%; }
   .action-col .action-btn{
     width: clamp(52px, 15vw, 70px);
     padding: 0 4px;
@@ -943,7 +951,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.35);
   }
   .deal-btn:hover{ filter:brightness(1.08); }
-  .deal-btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .deal-btn:disabled{ opacity:1; filter: brightness(0.35) saturate(0.5); cursor:not-allowed; }
 
   .insurance-banner{
     position:absolute;
@@ -1012,14 +1020,21 @@
   }
 
   .sidebet-row{
+    position: absolute;
+    bottom: 1%;
+    left: 0;
+    right: 0;
+    z-index: 6;
     display:flex;
     flex-direction:row;
     justify-content:space-between;
     align-items:center;
     gap: 6px;
-    margin: 2px -6px 6px;
-    width: calc(100% + 12px);
+    margin: 0;
+    padding: 0 2%;
+    width: 100%;
     max-width: none;
+    box-sizing: border-box;
   }
   .sidebet-spot{
     flex: 0 0 96px;
@@ -1038,9 +1053,9 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .sidebet-spot.sidebet-main{
-    flex: 1 1 auto;
-    height: 48px;
-    background: rgba(212,175,90,0.22);
+    flex: 0 0 96px;
+    height: 42px;
+    background: rgba(0,0,0,0.55);
   }
   .sidebet-spot .sb-name{
     font-size: 0.6rem;
@@ -1605,11 +1620,22 @@
         <div class="dealer-header">
           <div class="dealer-avatar" id="dealerAvatar"></div>
         </div>
-        <div class="hands-row">
+        <div class="hands-row" id="dealerHandsRow">
           <div class="hand" id="dealerHand">
             <div class="zone-label"><span class="score" id="dealerScore"></span></div>
             <div class="cards" id="dealerCards"></div>
           </div>
+        </div>
+      </div>
+      <div class="sidebet-row" id="bjSidebetRow">
+        <div class="sidebet-spot" data-target="pp" id="targetPP">
+          <span class="sb-name">Perfect Pairs</span><span class="sb-amt" id="amtPP">0</span>
+        </div>
+        <div class="sidebet-spot sidebet-main selected" data-target="main" id="targetMain">
+          <span class="sb-name">MAIN</span><span class="sb-amt" id="amtMain">0</span>
+        </div>
+        <div class="sidebet-spot" data-target="tri" id="targetTri">
+          <span class="sb-name">21+3</span><span class="sb-amt" id="amtTri">0</span>
         </div>
       </div>
 
@@ -1772,17 +1798,6 @@
   <div class="bottom-panel">
     <div id="bjBottom">
       <div class="message" id="message">チップを選んでベットしてください</div>
-      <div class="sidebet-row" id="bjSidebetRow">
-        <div class="sidebet-spot" data-target="pp" id="targetPP">
-          <span class="sb-name">Perfect Pairs</span><span class="sb-amt" id="amtPP">0</span>
-        </div>
-        <div class="sidebet-spot sidebet-main selected" data-target="main" id="targetMain">
-          <span class="sb-name">MAIN</span><span class="sb-amt" id="amtMain">0</span>
-        </div>
-        <div class="sidebet-spot" data-target="tri" id="targetTri">
-          <span class="sb-name">21+3</span><span class="sb-amt" id="amtTri">0</span>
-        </div>
-      </div>
 
       <div class="bet-controls" id="betControls">
         <div class="chip-row">
