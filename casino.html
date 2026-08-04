@@ -2011,17 +2011,22 @@ if(soundToggleBtn){
     updateSoundBtn();
   });
 }
+function playSoundReliable(baseAudio, offset){
+  try{
+    const node = baseAudio.cloneNode(true);
+    node.currentTime = offset;
+    node.volume = 1;
+    node.play().catch(()=>{});
+    node.addEventListener('ended', () => { node.remove(); });
+  } catch(e){}
+}
 function playWinSound(amount){
   if(!_soundEnabled) return;
-  try{
-    if(amount >= BIG_WIN_THRESHOLD){
-      SND_HORN.currentTime = 0.07;
-      SND_HORN.play().catch(()=>{});
-    } else {
-      SND_KYUIN.currentTime = 0.1;
-      SND_KYUIN.play().catch(()=>{});
-    }
-  } catch(e){}
+  if(amount >= BIG_WIN_THRESHOLD){
+    playSoundReliable(SND_HORN, 0.07);
+  } else {
+    playSoundReliable(SND_KYUIN, 0.1);
+  }
 }
 function flashWin(amount){
   const stat = document.getElementById('betStat');
