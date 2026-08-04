@@ -1414,28 +1414,47 @@
     display: none;
   }
   .poker-action-row{
+    position: absolute;
+    top: 79%;
+    height: 54px;
+    left: 0; right: 0;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
-    margin: 4px 0;
+    padding: 0 1%;
+    z-index: 7;
+    box-sizing: border-box;
   }
-  .poker-action-btn{
+  .poker-left-btns, .poker-right-btns{
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .poker-edge-btn{
     font-family: Georgia, serif;
-    font-size: 0.85rem;
+    font-size: 0.5rem;
     font-weight: bold;
-    letter-spacing: 0.05em;
-    padding: 0 28px;
-    height: clamp(26px, 5.2dvh, 32px);
-    border-radius: 999px;
+    letter-spacing: 0.02em;
+    padding: 4px 6px;
+    border-radius: 7px;
     border: 1px solid rgba(255,255,255,0.5);
     cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
-  .poker-fold{
+  .poker-fold-edge{
     background: linear-gradient(180deg, #666, #333);
     color: #eee;
   }
-  .poker-call{
+  .poker-check-edge{
+    background: linear-gradient(180deg, #4a7fc9, #1f4a7a);
+    color: #fff;
+  }
+  .poker-raise-edge{
+    background: linear-gradient(180deg, #c9483a, #7a1f16);
+    color: #fff;
+  }
+  .poker-call-edge{
     background: linear-gradient(180deg, #34b25a, #176b32);
     color: #fff;
   }
@@ -1622,6 +1641,16 @@
         <div class="poker-slot" id="pkComm3"></div>
         <div class="poker-slot" id="pkComm4"></div>
       </div>
+      <div class="poker-action-row" id="pokerActionRow" style="display:none;">
+        <div class="poker-left-btns">
+          <button class="poker-edge-btn poker-fold-edge" id="pokerFoldBtn">FOLD</button>
+          <button class="poker-edge-btn poker-check-edge" id="pokerCheckBtn">CHECK</button>
+        </div>
+        <div class="poker-right-btns">
+          <button class="poker-edge-btn poker-raise-edge" id="pokerRaiseBtn">RAISE</button>
+          <button class="poker-edge-btn poker-call-edge" id="pokerCallBtn">CALL</button>
+        </div>
+      </div>
       <div class="poker-hand-row poker-player-row" id="pokerPlayerRow">
         <div class="poker-hand-cards" id="pkPlayerCards">
           <div class="poker-slot" id="pkP0"></div>
@@ -1734,10 +1763,6 @@
 
     <div id="pokerBottom" style="display:none; min-height:34px; box-sizing:border-box;">
       <div class="message" id="pokerMessage">ANTEを選んでDEALを押してください</div>
-      <div class="poker-action-row" id="pokerActionRow" style="display:none;">
-        <button class="poker-action-btn poker-fold" id="pokerFoldBtn">FOLD</button>
-        <button class="poker-action-btn poker-call" id="pokerCallBtn">CALL</button>
-      </div>
       <div class="bet-controls" id="pokerBetControls">
         <div class="chip-row">
           <div class="chip" data-v="500">500</div>
@@ -3653,6 +3678,7 @@ function bestPokerHand(cards7){
 
 let pokerAnte = 0;
 let lastPokerAnte = 0;
+let pokerCallTotal = 0;
 let pokerRoundActive = false;
 let pokerStage = 'bet';
 let pokerPlayerHole = [];
@@ -3662,6 +3688,8 @@ let pokerCommunity = [];
 const pokerDealBtn = document.getElementById('pokerDealBtn');
 const pokerFoldBtn = document.getElementById('pokerFoldBtn');
 const pokerCallBtn = document.getElementById('pokerCallBtn');
+const pokerRaiseBtn = document.getElementById('pokerRaiseBtn');
+const pokerCheckBtn = document.getElementById('pokerCheckBtn');
 const pokerActionRow = document.getElementById('pokerActionRow');
 const pokerBetControls = document.getElementById('pokerBetControls');
 const pokerMessageEl = document.getElementById('pokerMessage');
@@ -3738,6 +3766,7 @@ function finishPokerRound(){
   pokerRoundActive = false;
   pokerStage = 'bet';
   pokerAnte = 0;
+  pokerCallTotal = 0;
   pokerActionRow.style.display = 'none';
   pokerBetControls.style.display = 'block';
   updatePokerHud();
@@ -3794,9 +3823,10 @@ pokerDealBtn.addEventListener('click', () => {
   hideWinFlash();
   balance -= pokerAnte;
   lastPokerAnte = pokerAnte;
+  pokerCallTotal = 0;
   updateHud();
   pokerRoundActive = true;
-  pokerStage = 'decision';
+  pokerStage = 'flop';
 
   pokerPlayerHole = [drawCard(), drawCard()];
   pokerDealerHole = [drawCard(), drawCard()];
@@ -3806,38 +3836,29 @@ pokerDealBtn.addEventListener('click', () => {
 
   renderPokerTable(false);
 
-  pokerBetControls.style.display = 'none';
   pokerActionRow.style.display = 'flex';
-  setPokerMessage('フロップが公開されました。CALL（アンティの2倍）かFOLDを選んでください');
+  setPokerMessage('フロップが公開されました。CALLかRAISE、またはFOLDを選んでください');
 });
 
 pokerFoldBtn.addEventListener('click', () => {
-  if(!pokerRoundActive || pokerStage !== 'decision') return;
+  if(!pokerRoundActive || (pokerStage !== 'flop' && pokerStage !== 'turn' && pokerStage !== 'river')) return;
   pokerStage = 'resolved';
-  pokerCommunity.push(drawCard(), drawCard());
+  while(pokerCommunity.length < 5) pokerCommunity.push(drawCard());
   renderPokerTable(true);
   const playerBest = bestPokerHand(pokerPlayerHole.concat(pokerCommunity));
   const dealerBest = bestPokerHand(pokerDealerHole.concat(pokerCommunity));
   pkPlayerHandNameEl.textContent = HAND_NAMES[playerBest.rank];
   pkDealerHandNameEl.textContent = HAND_NAMES[dealerBest.rank];
+  const lost = lastPokerAnte + pokerCallTotal;
   const breakdown = [{ label:'ANTE', stake: lastPokerAnte, returnMult: 0, total: 0 }];
+  if(pokerCallTotal > 0) breakdown.push({ label:'CALL/RAISE', stake: pokerCallTotal, returnMult: 0, total: 0 });
   showPokerResultOverlay('FOLD', 0, breakdown);
-  setPokerMessage(`フォールド — ANTE ${fmt(lastPokerAnte)} を失いました — 次のラウンドのANTEをどうぞ`);
+  setPokerMessage(`フォールド — ${fmt(lost)} を失いました — 次のラウンドのANTEをどうぞ`);
   finishPokerRound();
 });
 
-pokerCallBtn.addEventListener('click', () => {
-  if(!pokerRoundActive || pokerStage !== 'decision') return;
-  const callBet = lastPokerAnte * 2;
-  if(callBet > balance){
-    setPokerMessage('残高が不足しています');
-    return;
-  }
-  balance -= callBet;
-  updateHud();
+function pokerShowdown(){
   pokerStage = 'resolved';
-
-  pokerCommunity.push(drawCard(), drawCard());
   renderPokerTable(true);
 
   const playerBest = bestPokerHand(pokerPlayerHole.concat(pokerCommunity));
@@ -3847,21 +3868,22 @@ pokerCallBtn.addEventListener('click', () => {
 
   const dealerQualifies = dealerBest.rank >= 1;
   const cmp = comparePokerHands(playerBest, dealerBest);
+  const callBet = pokerCallTotal;
 
   let breakdown = [];
   let resultWord = '';
   if(!dealerQualifies){
     breakdown.push({ label:'ANTE', stake: lastPokerAnte, returnMult: 2, total: lastPokerAnte*2 });
-    breakdown.push({ label:'CALL (プッシュ)', stake: callBet, returnMult: 1, total: callBet });
+    if(callBet > 0) breakdown.push({ label:'CALL/RAISE (プッシュ)', stake: callBet, returnMult: 1, total: callBet });
     resultWord = 'WIN';
   } else if(cmp > 0){
     const mult = CALL_PAYTABLE[playerBest.rank] || 1;
     breakdown.push({ label:'ANTE', stake: lastPokerAnte, returnMult: 2, total: lastPokerAnte*2 });
-    breakdown.push({ label:'CALL', stake: callBet, returnMult: mult+1, total: callBet*(mult+1) });
+    if(callBet > 0) breakdown.push({ label:'CALL/RAISE', stake: callBet, returnMult: mult+1, total: callBet*(mult+1) });
     resultWord = 'WIN';
   } else if(cmp === 0){
     breakdown.push({ label:'ANTE (プッシュ)', stake: lastPokerAnte, returnMult: 1, total: lastPokerAnte });
-    breakdown.push({ label:'CALL (プッシュ)', stake: callBet, returnMult: 1, total: callBet });
+    if(callBet > 0) breakdown.push({ label:'CALL/RAISE (プッシュ)', stake: callBet, returnMult: 1, total: callBet });
     resultWord = 'PUSH';
   } else {
     resultWord = 'LOSE';
@@ -3877,6 +3899,45 @@ pokerCallBtn.addEventListener('click', () => {
   const qualNote = dealerQualifies ? '' : '（不成立）';
   setPokerMessage(`あなた: ${HAND_NAMES[playerBest.rank]} / ディーラー: ${HAND_NAMES[dealerBest.rank]}${qualNote} — 次のラウンドのANTEをどうぞ`);
   finishPokerRound();
+}
+
+function pokerAdvance(betAmount){
+  if(betAmount > balance){
+    setPokerMessage('残高が不足しています');
+    return;
+  }
+  balance -= betAmount;
+  pokerCallTotal += betAmount;
+  updateHud();
+
+  if(pokerStage === 'flop'){
+    pokerCommunity.push(drawCard());
+    renderPokerTable(false);
+    pokerStage = 'turn';
+    setPokerMessage('ターンが公開されました。CALLかRAISE、またはFOLDを選んでください');
+  } else if(pokerStage === 'turn'){
+    pokerCommunity.push(drawCard());
+    renderPokerTable(false);
+    pokerStage = 'river';
+    setPokerMessage('リバーが公開されました。CALLかRAISE、またはFOLDを選んでください');
+  } else if(pokerStage === 'river'){
+    pokerShowdown();
+  }
+}
+
+pokerCheckBtn.addEventListener('click', () => {
+  if(!pokerRoundActive || (pokerStage !== 'flop' && pokerStage !== 'turn' && pokerStage !== 'river')) return;
+  pokerAdvance(0);
+});
+
+pokerCallBtn.addEventListener('click', () => {
+  if(!pokerRoundActive || (pokerStage !== 'flop' && pokerStage !== 'turn' && pokerStage !== 'river')) return;
+  pokerAdvance(lastPokerAnte);
+});
+
+pokerRaiseBtn.addEventListener('click', () => {
+  if(!pokerRoundActive || (pokerStage !== 'flop' && pokerStage !== 'turn' && pokerStage !== 'river')) return;
+  pokerAdvance(lastPokerAnte * 2);
 });
 </script>
 </body>
