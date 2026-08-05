@@ -512,8 +512,6 @@
     border: 1px solid rgba(212,175,90,0.35);
     border-radius: 6px;
     min-width: 86px;
-    max-height: 160px;
-    overflow-y: auto;
   }
   .bj-history .bh-row{
     display:flex;
@@ -3748,13 +3746,14 @@ function computeRoad(history){
 function renderBacRoad(){
   if(!bacRoadEl) return;
   const cells = computeRoad(bacHistory);
+  const maxRow = cells.reduce((m,c) => Math.max(m, c.row), 0);
   bacRoadEl.innerHTML = '';
   cells.forEach(c => {
     const d = document.createElement('div');
     const cls = c.result === 'player' ? 'p' : (c.result === 'banker' ? 'b' : 't');
     d.className = 'rd ' + cls;
     d.style.gridColumn = (c.col+1);
-    d.style.gridRow = (c.row+1);
+    d.style.gridRow = (maxRow - c.row + 1);
     if(c.ties > 0 && c.result !== 'tie'){
       const tag = document.createElement('span');
       tag.className = 'rd-tie';
