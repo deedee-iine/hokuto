@@ -1682,8 +1682,8 @@
   }
   .roulette-wheel-wrap{
     position: absolute;
-    top: 48%;
-    left: 40%;
+    top: 49%;
+    left: 41%;
     transform: translate(-50%, -50%);
     width: 67.6%;
     max-width: none;
@@ -1812,7 +1812,8 @@
   }
   .roulette-bet-zone.selected{
     border-color: var(--gold-bright);
-    background: rgba(212,175,90,0.28);
+    border-width: 2px;
+    box-shadow: 0 0 6px 1px rgba(212,175,90,0.7);
   }
   .roulette-bet-zone.lightning-target{
     border-color: #ffe066;
@@ -4981,10 +4982,6 @@ function hideRouletteResultOverlay(){
 rouletteSpinBtn.addEventListener('click', () => {
   const stake = rouletteTotalBet();
   if(stake <= 0 || rouletteSpinning) return;
-  if(stake > balance){
-    setRouletteMessage('残高が不足しています');
-    return;
-  }
   hideRouletteResultOverlay();
   hideWinFlash();
   lastRouletteBets = { ...rouletteBets };
