@@ -1058,9 +1058,17 @@
     </div>
   </div>
 
-  <div class="table-title" style="display:flex; justify-content:space-between; align-items:center;">
+  <div class="table-title">
     <span>差枚スランプグラフ</span>
-    <span class="speed-label" id="seYuriKukanProgress2" style="display:none;"></span>
+  </div>
+  <div id="seYuriKukanProgressWrap" style="display:none; margin:0 0 8px;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; font-family:'Share Tech Mono', monospace; font-size:11px; color:#e9e0d2; margin-bottom:3px;">
+      <span>✂️有利区間切断まで</span>
+      <span id="seYuriKukanProgressText" style="color:#ffd97a;"></span>
+    </div>
+    <div style="background:rgba(0,0,0,.4); border-radius:5px; height:10px; overflow:hidden; box-shadow:inset 0 0 4px rgba(0,0,0,.6);">
+      <div id="seYuriKukanProgressBar" style="height:100%; background:linear-gradient(90deg,#ff9a5a,#ff3b3b); width:0%; transition:width .2s ease;"></div>
+    </div>
   </div>
   <div class="graph-panel">
     <canvas id="graph" height="160"></canvas>
@@ -1375,9 +1383,9 @@
       <ul class="manual-list">
         <li>前兆G数は<b>6〜32G</b>の範囲で抽選(7揃い・BAR揃いで振り分けが異なる)</li>
         <li>ボーナス絵柄は<b>7揃い(通常)</b>または<b>BAR揃い(レア)</b>。BAR揃いは継続率が高いテーブルを参照します</li>
-        <li>ボーナスは<b>1セット10G</b>(1枚掛け、毎ゲーム中段ベル)。10G消化後、<b>チャンスゾーン10G(3枚掛け)</b>で継続抽選</li>
-        <li>継続率は<b>66% / 79% / 84% / 89%</b>の4段階。7揃いは設定で振り分けが変わり、BAR揃いは84%/89%の50-50固定</li>
-        <li>継続すれば次の10Gセットへ、非継続ならボーナス終了(履歴では「ゼロモード」と表示)</li>
+        <li>ボーナスは<b>1セット10G</b>(1枚掛け、毎ゲーム中段ベル11枚払出し)。10G消化後、<b>チャンスゾーン10G(3枚掛け)</b>で継続抽選</li>
+        <li>継続率は<b>66% / 79% / 84% / 89% / 94%</b>の5段階。7揃いは設定で振り分けが変わり、BAR揃いは84%/89%の50-50固定</li>
+        <li>継続すれば次の10Gセットへ、非継続ならボーナス終了(履歴では「ゼロモード」と表示)。ただし非継続でも「1G連」抽選で救済される場合があります(⑪参照)</li>
         <li>チャンスゾーン中も通常の小役抽選を行い、役の成立で継続時はモードアップ、非継続時は継続書き換えの可能性があります</li>
       </ul>
 
@@ -1446,6 +1454,50 @@
         <li>tierごとに色分け(地獄=赤系、通常=グレー系、天国=金色系、前兆=紫系)。ボーナス=金色点滅、チャンスゾーン継続=水色点滅、ゼロモード=グレー</li>
         <li>バッジを隠すと、継続率や継続有無などの詳細情報は結果発表(全リール停止・タップを離した瞬間)まで表示されません</li>
         <li>隠している間、チャンス目・スイカ・強チェリー・リーチ目役を引くと32Gの隠しカウントダウンが表示されます(役アイコン付き)。当選確定していても表示は独立してカウントダウンし、0Gで終わっても外れの場合があります</li>
+      </ul>
+
+      <div class="table-title">⑧ 94%ループ</div>
+      <ul class="manual-list">
+        <li>継続中のチャンスゾーンで強チェリー・強スイカ・リーチ目役が成立すると、現在の継続率に応じた確率で「94%ループ」が発動(全設定共通)</li>
+        <li>発動確率:継続66%時 → 強🍒3% / 強🍉1% / リーチ目50%、79%時 → 5% / 3% / 50%、84%時 → 7% / 5% / 50%、89%時 → 10% / 7% / 50%</li>
+        <li>発動すると、まず<b>Vストック1個</b>(次セット無条件継続)を消化 → <b>89%ループ</b>(転落するまで89%を維持)→ 転落したら<b>84%ループ</b>(転落するまで維持)→ 転落で終了、というカスケードに入ります</li>
+        <li>1チェーンにつき1回だけ発動。発動中は履歴・円グラフ上で継続率「94%」として扱われます</li>
+        <li>総ゲーム数<b>6000G以内</b>は、継続率66%/79%での94%ループ抽選は行われません(84%/89%は制限なし)</li>
+        <li>設定画面の「94%ループ」チェックでオン/オフ切替可能(オフだとこの抽選自体が行われません)</li>
+      </ul>
+
+      <div class="table-title">⑨ 有利区間</div>
+      <ul class="manual-list">
+        <li>プラス差枚が<b>1800〜2200枚</b>(発動のたびランダム)を超えると、ボーナス最終G(10G目)の結果発表タイミングで強制的に「切断」されます</li>
+        <li>切断後は設定別の再セット率で抽選:成功なら継続率84%/89%(50-50)で再セットしチャンスゾーンへ、失敗ならゼロモードへ強制終了</li>
+        <li>再セット率:設定①②80% / ④⑤50% / ⑥30%</li>
+        <li>再セット成功時、さらに設定別の確率で「94%ループと同じ仕様」(⑧参照)が直接発動:設定①②70% / ④⑤50% / ⑥20%</li>
+        <li>切断の瞬間、保有中のVストックは0にリセットされます</li>
+        <li>切断回数はスランプグラフ上に赤い点で表示、グラフタイトル横に現在の進行度(+◯◯/◯◯◯◯枚)を表示</li>
+      </ul>
+
+      <div class="table-title">⑩ 冷遇・優遇</div>
+      <ul class="manual-list">
+        <li><b>冷遇</b>:直近の基準点からのプラス差枚が一定枚数を超えると発動。発動G数は枚数のブラケットで決まります</li>
+        <li>設定①:+500〜999枚→700G、+1000〜1499枚→1000G、+1500枚以上→1600G</li>
+        <li>設定②④⑤⑥:+500〜999枚→300G、+1000〜1499枚→500G、+1500〜1999枚→700G、+2000〜2499枚→1000G、+2500枚以上→1600G</li>
+        <li>直近1600G間の差枚が+1800枚以上ならさらに上乗せ発動:設定①②は1000G、設定④⑤⑥は800G</li>
+        <li>冷遇中も、弱スイカ・弱チェリー・チャンス目を含む全ての役のモード移行/前兆抽選が通常通り行われます(全設定共通)</li>
+        <li>冷遇中に前兆が成立した場合、BB確定時の継続率は<b>66%固定</b>になります</li>
+        <li>冷遇機能がオンの間は、継続率ごとの最大連チャン数(66%=5連/79%=8連/84%=10連/89%=10連、94%は無制限)が全チェーンに適用されます。ただし強制フラグ使用時・有利区間切断で再セットされたチェーンはこの上限の対象外です</li>
+        <li>84%/89%の10連リミッターは、総差枚が<b>プラス域の時のみ</b>適用されます。マイナス域の時、および94%ループのVストック/89%/84%ループ段階中はリミッターなしです</li>
+        <li>冷遇由来のチェーン(冷遇状態で前兆が成立したもの)は、さらに<b>単発(1連)か2連で強制終了</b>します</li>
+        <li>冷遇の新規発動判定は前兆消化中には行われません(通常Gに戻ってから判定)</li>
+        <li><b>優遇</b>(冷遇の逆):直近1600G間の差枚が-1500枚以上のマイナスで発動。優遇中はBB当選時の継続率抽選で66%を選ばなくなります</li>
+        <li>スランプグラフ上で、冷遇中は赤い帯、優遇中は緑の帯で表示されます</li>
+      </ul>
+
+      <div class="table-title">⑪ その他の小役・救済要素</div>
+      <ul class="manual-list">
+        <li>ベル確率は<b>1/10</b>、払出しは通常時・前兆消化中とも<b>11枚</b></li>
+        <li>ボーナス中のベル払出しごとに<b>1/200でVストック抽選</b>(保有上限なし。有利区間切断時にリセット)。当選すれば継続抽選で最優先消化されます</li>
+        <li><b>1G連</b>:チャンスゾーンが非継続で終わるはずだった場合の追加抽選。66/79%時は7揃い0.4%・BAR揃い0.2%、84/89%時は7揃い0.8%・BAR揃い0.2%(残りゼロモード)。成功すると1セットだけ救済され、後続のチャンスゾーン1G目で花が長めに光ります</li>
+        <li>設定④⑤⑥限定:差枚が<b>-2000枚以上</b>のマイナスの時、前兆のBAR揃い選択率が3%→<b>50%</b>に上昇(天井経由の前兆は対象外)。この救済は一回だけで、-2000枚を回復すると再び対象になります</li>
       </ul>
 
       <div class="hist-note">SIMULATION ONLY — 実際の遊技機とは異なり、確率は独立試行として簡略化しています。</div>
@@ -1966,6 +2018,7 @@ const SYM_IMG = {
     seReiguGamesLeft:0,
     seReiguBaseNet:0,
     seBarRescueUsed:false,
+    seMaxDrawdown:0,
     seForceEnabled:false,
     mainForceEnabled:false,
     seNet1600:[],
@@ -2039,6 +2092,7 @@ const SYM_IMG = {
       seReiguGamesLeft:0,
       seReiguBaseNet:0,
       seBarRescueUsed:false,
+      seMaxDrawdown:0,
       seForceEnabled: state.seForceEnabled !== undefined ? state.seForceEnabled : false,
       mainForceEnabled: state.mainForceEnabled !== undefined ? state.mainForceEnabled : false,
       seNet1600:[],
@@ -2391,7 +2445,7 @@ const SYM_IMG = {
           bg.chanceContinues = Math.random() < 0.84; // 転落するまでずっと84%を維持
           if(!bg.chanceContinues) bg.loopStage = null; // 転落したら通常抽選に戻る(=終了)
         } else {
-          bg.chanceContinues = Math.random() < bg.continuationTier;
+          bg.chanceContinues = Math.random() < getEffectiveContinuationRate(bg.continuationTier);
         }
         bg.chanceGameIndex = 0;
         bg.phase = 'chance';
@@ -2497,10 +2551,10 @@ const SYM_IMG = {
       weakCherry: 0.10, strongCherry: 1.00, reachme: 1.00,
     };
     const SE_94_LOOP_RATE = {
-      0.66: { strongCherry:0.05, strongWatermelon:0.01, reachme:0.50 },
-      0.79: { strongCherry:0.07, strongWatermelon:0.03, reachme:0.60 },
-      0.84: { strongCherry:0.10, strongWatermelon:0.05, reachme:0.70 },
-      0.89: { strongCherry:0.13, strongWatermelon:0.07, reachme:0.80 },
+      0.66: { strongCherry:0.03, strongWatermelon:0.01, reachme:0.50 },
+      0.79: { strongCherry:0.05, strongWatermelon:0.03, reachme:0.50 },
+      0.84: { strongCherry:0.07, strongWatermelon:0.05, reachme:0.50 },
+      0.89: { strongCherry:0.10, strongWatermelon:0.07, reachme:0.50 },
     };
 
     let reels, label2 = null, isWin2 = false, payout2 = 0, key2 = null, customGrid2 = null;
@@ -2564,7 +2618,9 @@ const SYM_IMG = {
     // 94%ループ(オンオフ切替可): 継続中のチャンスゾーンで強チェリー/強スイカ/リーチ目役が成立すると、
     // 現在の継続率に応じた確率で「94%ループ」が発動する(全設定共通)
     // 内容: Vストック1個消化(次セット継続確定) → 89%ループ(転落するまで維持) → 転落で84%ループ(転落するまで維持) → 転落で終了
-    if(state.se94LoopEnabled && bg.chanceContinues && (ccOutcome === 'strongCherry' || ccOutcome === 'strongWatermelon' || ccOutcome === 'reachme') && !bg.loop94Used && bg.continuationTier < 0.94){
+    // 総ゲーム数6000G以内は、継続率66%/79%での抽選を行わない
+    const skip94ForLowGCount = state.totalSpins <= 6000 && (bg.continuationTier === 0.66 || bg.continuationTier === 0.79);
+    if(state.se94LoopEnabled && !skip94ForLowGCount && bg.chanceContinues && (ccOutcome === 'strongCherry' || ccOutcome === 'strongWatermelon' || ccOutcome === 'reachme') && !bg.loop94Used && bg.continuationTier < 0.94){
       const rates = SE_94_LOOP_RATE[bg.continuationTier];
       if(rates && Math.random() < rates[ccOutcome]){
         bg.loop94Used = true;
@@ -2600,9 +2656,14 @@ const SYM_IMG = {
         bg.chanceContinues = false;
         bg.oneGRenchan = false;
       }
-      // 冷遇機能オン時: 継続率ごとの最大連チャン数(66%=5連/79%=8連/84%=10連、89%/94%は無制限)。強制フラグ使用時は適用しない
+      // 冷遇機能オン時: 継続率ごとの最大連チャン数(66%=5連/79%=8連/84%=10連/89%=10連、94%は無制限)。強制フラグ使用時は適用しない
+      // 84%/89%は例外あり: 94%ループのVストック/89%/84%ループ段階中、または総差枚がマイナスの時はリミッターなし
       if(state.seReiguEnabled && !bg.forcedTier){
-        const tierCap = SE_REIGU_TIER_CAP[Math.round(bg.continuationTier*100)];
+        const isNegative = (state.totalOut - state.totalIn) < 0;
+        const in94LoopCascade = !!bg.loopStage || (bg.loopVStock || 0) > 0; // Vストック/89%/84%ループ中は94%継続の一部として扱う
+        const effectiveTierPct = bg.loopStage === '84' ? 84 : (bg.loopStage === '89' ? 89 : Math.round(bg.continuationTier*100));
+        const skipLimit = (effectiveTierPct === 84 || effectiveTierPct === 89) && (in94LoopCascade || isNegative);
+        const tierCap = skipLimit ? undefined : SE_REIGU_TIER_CAP[effectiveTierPct];
         if(tierCap && bg.setNumber >= tierCap){
           bg.chanceContinues = false;
           bg.oneGRenchan = false;
@@ -3012,18 +3073,33 @@ const SYM_IMG = {
   }
   // 冷遇機能: 過去1500G間の差枚に応じて冷遇G数を決定(設定①②④⑤ と 設定⑥で枚数が異なる)
   const SE_REIGU_BRACKETS = {
-    normal: [ {min:2000, len:1600}, {min:1500, len:1000}, {min:1000, len:700}, {min:500, len:500} ], // 設定①②
-    hi:     [ {min:2500, len:1600}, {min:2000, len:1000}, {min:1500, len:700}, {min:1000, len:500}, {min:500, len:300} ], // 設定④⑤⑥
+    normal: [ {min:1500, max:Infinity, len:1600}, {min:1000, max:1499, len:1000}, {min:500, max:999, len:700} ], // 設定①
+    hi:     [ {min:2500, max:Infinity, len:1600}, {min:2000, max:2499, len:1000}, {min:1500, max:1999, len:700}, {min:1000, max:1499, len:500}, {min:500, max:999, len:300} ], // 設定②④⑤⑥
   };
   function pickSEReiguDuration(gain){
-    const brackets = (state.seSetting === 1 || state.seSetting === 2) ? SE_REIGU_BRACKETS.normal : SE_REIGU_BRACKETS.hi;
+    const brackets = (state.seSetting === 1) ? SE_REIGU_BRACKETS.normal : SE_REIGU_BRACKETS.hi;
     for(const b of brackets){
-      if(gain >= b.min) return b.len;
+      if(gain >= b.min && gain <= b.max) return b.len;
     }
     return 0; // 該当なし(発動しない)
   }
   // 冷遇機能オン時: 継続率ごとの最大連チャン数(89%/94%は無制限のためテーブルに含めない)
-  const SE_REIGU_TIER_CAP = { 66: 5, 79: 8, 84: 10 };
+  const SE_REIGU_TIER_CAP = { 66: 5, 79: 8, 84: 10, 89: 10 };
+  // 冷遇: 設定①②限定、吸い込み(最大マイナス幅)から半分くらい出玉が戻ったら、66%/79%継続時はそれ以降継続率50%にする
+  function updateSEDrawdown(){
+    const net = state.totalOut - state.totalIn;
+    if(state.seMaxDrawdown === undefined || net < state.seMaxDrawdown) state.seMaxDrawdown = net;
+  }
+  function getEffectiveContinuationRate(baseRate){
+    if((state.seSetting === 1 || state.seSetting === 2) && (baseRate === 0.66 || baseRate === 0.79)){
+      const net = state.totalOut - state.totalIn;
+      const drawdown = state.seMaxDrawdown || 0;
+      if(drawdown < 0 && net >= drawdown / 2){
+        return 0.50;
+      }
+    }
+    return baseRate;
+  }
   function tickSEReigu(inZencho){
     if(!state.seReiguEnabled) return;
     const netNow = state.totalOut - state.totalIn;
@@ -3351,6 +3427,7 @@ const SYM_IMG = {
       state.seZenchoGamesLeft--;
       state.seNormalSpins++;
       tickSEBackground();
+      updateSEDrawdown();
       tickSEReigu(true); // 前兆消化中: 冷遇の新規発動は判定しない
       if(state.seHiddenCountdown > 0) state.seHiddenCountdown--;
       if(state.seHiddenCountdown === 0) state.seHiddenCountdownIcon = '';
@@ -3390,6 +3467,7 @@ const SYM_IMG = {
         const savedMainMode = state.mode;
         payout = triggerBonus('bb', 'se_zencho');
         state.mode = savedMainMode;
+        state.seReiguBaseNet = state.totalOut - state.totalIn; // 冷遇の発動判定は「このBB開始からの差枚」を基準にする(1600G固定ウィンドウの上乗せ/優遇判定はそのまま)
         if(state.bonusGame) state.bonusGame.reiguCapped = wasReigu && !(state.seForceEnabled && state.seForceBBTier); // 強制フラグ使用時は冷遇の単発/2連制限を適用しない
         if(state.bonusGame) state.bonusGame.forcedTier = !!(state.seForceEnabled && state.seForceBBTier);
         if(forceLoop94 && state.bonusGame){
@@ -3492,6 +3570,7 @@ const SYM_IMG = {
       state.seTierSpinCounts[state.seTier]++;
       state.seNormalSpins++;
       tickSEBackground();
+      updateSEDrawdown();
       tickSEReigu(false);
       if(state.seHiddenCountdown > 0) state.seHiddenCountdown--;
       if(state.seHiddenCountdown === 0) state.seHiddenCountdownIcon = '';
@@ -3578,7 +3657,7 @@ const SYM_IMG = {
         state.seHiddenCountdown = 32;
         state.seHiddenCountdownRevealPending = true;
         state.seHiddenCountdownIcon = '❓';
-        if(!state.seReiguActive) applySERoleTransition('chanceme', ()=>{});
+        applySERoleTransition('chanceme', ()=>{}); // 冷遇中も全設定で通常通り動作
         rollSEBgRareTrigger();
       } else if(outcome === 'weakWatermelon' || outcome === 'strongWatermelon'){
         reels = ['watermelon','watermelon','watermelon'];
@@ -3591,7 +3670,7 @@ const SYM_IMG = {
         state.seHiddenCountdown = 32;
         state.seHiddenCountdownRevealPending = true;
         state.seHiddenCountdownIcon = '🍉';
-        const picked = (state.seReiguActive && !isStrong) ? null : applySERoleTransition(outcome, ()=>{
+        const picked = applySERoleTransition(outcome, ()=>{ // 冷遇中も全設定で通常通り動作
           const zenchoChance = (state.seTier === 'heaven') ? 0.50 : 0.12;
           if(Math.random() < zenchoChance){
             enterSEZencho(false, outcome);
@@ -3610,7 +3689,7 @@ const SYM_IMG = {
         payout = 2; key = 'cherry';
         if(isStrong) state.counts.seStrongCherry++; else state.counts.seWeakCherry++;
         if(isStrong){ state.seHiddenCountdown = 32; state.seHiddenCountdownIcon = '🍒'; state.seHiddenCountdownRevealPending = true; }
-        const picked = (state.seReiguActive && !isStrong) ? null : applySERoleTransition(outcome, ()=>{
+        const picked = applySERoleTransition(outcome, ()=>{ // 冷遇中も全設定で通常通り動作
           const zenchoChance = (state.seTier === 'heaven') ? 1.00 : 0.25;
           if(Math.random() < zenchoChance){
             enterSEZencho(false, outcome);
@@ -4102,16 +4181,24 @@ const SYM_IMG = {
     if(seReiguLegendEl) seReiguLegendEl.style.display = (state.seMode && state.seReiguEnabled) ? '' : 'none';
     const seYuguLegendEl = document.getElementById('seYuguLegend');
     if(seYuguLegendEl) seYuguLegendEl.style.display = (state.seMode && state.seReiguEnabled) ? '' : 'none';
-    const seYuriKukanProgEl = document.getElementById('seYuriKukanProgress2');
+    const seYuriKukanProgWrapEl = document.getElementById('seYuriKukanProgressWrap');
+    const seYuriKukanProgTextEl = document.getElementById('seYuriKukanProgressText');
+    const seYuriKukanProgBarEl = document.getElementById('seYuriKukanProgressBar');
     const seYuriKukanCutLegendEl = document.getElementById('seYuriKukanCutLegend');
-    if(seYuriKukanProgEl){
+    if(seYuriKukanProgWrapEl){
       if(state.seMode && state.seYuriKukanEnabled){
-        const netNow = Math.max(0, (state.totalOut - state.totalIn) - state.seYuriKukanBaseNet);
-        seYuriKukanProgEl.style.display = '';
-        seYuriKukanProgEl.textContent = `切断まで +${netNow}/${state.seYuriKukanThreshold}枚 (切断${state.seYuriKukanCutCount||0}回)`;
+        const netNow = (state.totalOut - state.totalIn) - state.seYuriKukanBaseNet;
+        const pct = Math.max(0, Math.min(100, (netNow / state.seYuriKukanThreshold) * 100));
+        seYuriKukanProgWrapEl.style.display = '';
+        const sign = netNow >= 0 ? '+' : '';
+        if(seYuriKukanProgTextEl){
+          seYuriKukanProgTextEl.textContent = `${sign}${netNow.toLocaleString()} / ${state.seYuriKukanThreshold.toLocaleString()}枚 (切断${state.seYuriKukanCutCount||0}回)`;
+          seYuriKukanProgTextEl.style.color = netNow < 0 ? '#8fc8ff' : '#ffd97a';
+        }
+        if(seYuriKukanProgBarEl) seYuriKukanProgBarEl.style.width = pct + '%';
         if(seYuriKukanCutLegendEl) seYuriKukanCutLegendEl.style.display = '';
       } else {
-        seYuriKukanProgEl.style.display = 'none';
+        seYuriKukanProgWrapEl.style.display = 'none';
         if(seYuriKukanCutLegendEl) seYuriKukanCutLegendEl.style.display = 'none';
       }
     }
