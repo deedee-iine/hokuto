@@ -154,6 +154,54 @@
   .bg-scope-btn:active{
     background: rgba(212,175,90,0.35);
   }
+  .edit-modal-box{
+    background: #1a1410;
+    border: 1px solid rgba(212,175,90,0.6);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 82%;
+    max-width: 300px;
+    max-height: 78vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .edit-modal-rows{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .edit-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: #f0e2ae;
+  }
+  .edit-row input{
+    width: 64px;
+    font-size: 0.72rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(212,175,90,0.4);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    text-align: right;
+  }
+  .edit-modal-btns{
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .edit-modal-btns .bg-scope-btn{
+    flex: 1 1 0;
+  }
+  .edit-cancel{
+    background: rgba(255,255,255,0.08);
+  }
   .center-table{
     flex: 1 1 auto;
     min-height: 0;
@@ -1262,14 +1310,40 @@
     border-radius: 6px;
     padding: 2px 3px;
   }
+  .spc-title-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 4px;
+    padding-bottom: 1px;
+    margin-bottom: 1px;
+    border-bottom: 1px solid rgba(212,175,90,0.25);
+  }
   .spc-title{
     text-align:center;
     font-size:0.5rem;
     letter-spacing:0.02em;
     color: var(--gold-bright);
-    padding-bottom: 1px;
-    margin-bottom: 1px;
-    border-bottom: 1px solid rgba(212,175,90,0.25);
+  }
+  .lw-icon-row{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 3px;
+  }
+  .pt-edit-btn{
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.35);
   }
   .spc-row{
     display:flex;
@@ -1702,6 +1776,28 @@
   .roulette-road .rd.x50{ background: #13b053; }
   .roulette-road .rd.x100{ background: #ff66ff; }
   .roulette-road .rd.jackpot{ background: #f50a0a; }
+  .roulette-move-btn{
+    position: absolute;
+    top: 3%;
+    left: 33%;
+    z-index: 4;
+  }
+  .pt-edit-btn.active{
+    background: rgba(109,255,176,0.35);
+    border-radius: 4px;
+    box-shadow: 0 0 4px rgba(109,255,176,0.8);
+  }
+  .drag-target{
+    outline: 2px dashed rgba(109,255,176,0.8);
+    outline-offset: 2px;
+    cursor: move;
+  }
+  .roulette-edit-btn{
+    position: absolute;
+    top: 3%;
+    left: 28%;
+    z-index: 4;
+  }
   .roulette-prob-table{
     position: absolute;
     top: 2%;
@@ -2032,7 +2128,11 @@
 
     <div id="slotCenter" style="display:none;">
       <div class="lightning-wrap lightning-wrap-right">
-        <button class="lightning-btn" id="slotLightningBtn">⚡</button>
+        <div class="lw-icon-row">
+          <span id="slotEditBtn" class="pt-edit-btn">⚙️</span>
+          <span id="slotMoveBtn" class="pt-edit-btn">✥</span>
+          <button class="lightning-btn" id="slotLightningBtn">⚡</button>
+        </div>
         <div class="lightning-info" id="slotLightningInfo"></div>
       </div>
       <div class="bj-result-overlay" id="slotResultOverlay">
@@ -2046,7 +2146,7 @@
       </div>
       <div class="slot-history" id="slotHistory"></div>
       <div class="slot-paytable-compact" id="slotPaytableCompact">
-        <div class="spc-title" id="payTitle">配当確率</div>
+        <div class="spc-title-row"><span class="spc-title" id="payTitle">配当確率</span></div>
         <div class="spc-row">
           <div class="spc-cell"><span class="spc-sym" id="paySym0"></span><span class="spc-txt" id="payProb0">1/4</span><span class="spc-mult">リスピン</span></div>
           <div class="spc-cell"><span class="spc-sym" id="paySym1"></span><span class="spc-txt" id="payProb1">1/8</span><span class="spc-mult">x2</span></div>
@@ -2057,7 +2157,7 @@
         </div>
       </div>
       <div class="slot-reel-spacer"></div>
-      <div class="slot-machine">
+      <div class="slot-machine" id="slotMachineWrap">
         <div class="slot-reels slot-reels-3x">
           <div class="slot-reel" id="reel1" data-sym="bell"></div>
           <div class="slot-reel" id="reel2" data-sym="cherry"></div>
@@ -2140,10 +2240,14 @@
     <div class="roulette-road" id="rouletteRoad"></div>
     <div class="roulette-prob-table" id="rouletteProbTable"></div>
     <div class="lightning-wrap lightning-wrap-right">
-      <button class="lightning-btn" id="rouletteLightningBtn">⚡</button>
+      <div class="lw-icon-row">
+        <span id="rouletteEditBtn" class="pt-edit-btn">⚙️</span>
+        <span id="rouletteMoveBtn" class="pt-edit-btn">✥</span>
+        <button class="lightning-btn" id="rouletteLightningBtn">⚡</button>
+      </div>
       <div class="lightning-info" id="rouletteLightningInfo"></div>
     </div>
-    <div class="roulette-wheel-wrap">
+    <div class="roulette-wheel-wrap" id="rouletteWheelWrap">
       <div class="roulette-pointer">▼</div>
       <div class="roulette-wheel" id="rouletteWheel">
       </div>
@@ -2295,6 +2399,28 @@
     <div class="bg-scope-title">この背景をどこに適用しますか？</div>
     <button id="bgScopeAll" class="bg-scope-btn">全ゲームに適用</button>
     <button id="bgScopeOne" class="bg-scope-btn">このゲームのみ</button>
+  </div>
+</div>
+
+<div id="slotEditModal" class="bg-scope-modal" style="display:none;">
+  <div class="edit-modal-box">
+    <div class="bg-scope-title">スロット確率編集（重み）</div>
+    <div id="slotEditRows" class="edit-modal-rows"></div>
+    <div class="edit-modal-btns">
+      <button id="slotEditSave" class="bg-scope-btn">保存</button>
+      <button id="slotEditCancel" class="bg-scope-btn edit-cancel">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div id="rouletteEditModal" class="bg-scope-modal" style="display:none;">
+  <div class="edit-modal-box">
+    <div class="bg-scope-title">ルーレット確率編集（重み倍率）</div>
+    <div id="rouletteEditRows" class="edit-modal-rows"></div>
+    <div class="edit-modal-btns">
+      <button id="rouletteEditSave" class="bg-scope-btn">保存</button>
+      <button id="rouletteEditCancel" class="bg-scope-btn edit-cancel">キャンセル</button>
+    </div>
   </div>
 </div>
 
@@ -4897,6 +5023,7 @@ function renderRouletteWheelSegments(){
 }
 let rouletteBets = { x1:0, x2:0, x5:0, x10:0, x20:0, x50:0, x100:0, jackpot:0 };
 let rouletteJackpot = 500;
+let rouletteWeightMult = { x1:1, x2:1, x5:1, x10:1, x20:1, x50:1, x100:1, jackpot:1 };
 let rouletteLightning = false;
 let rouletteLightningCards = null;
 let rouletteLightningTarget = null;
@@ -5049,8 +5176,13 @@ document.getElementById('rouletteAllInBet').addEventListener('click', () => {
 });
 
 function rollRouletteSegment(){
-  const idx = Math.floor(Math.random() * ROULETTE_TABLE.length);
-  return ROULETTE_TABLE[idx];
+  const totalWeight = ROULETTE_TABLE.reduce((s,seg) => s + (rouletteWeightMult[seg.key] || 1), 0);
+  let r = Math.random() * totalWeight;
+  for(const seg of ROULETTE_TABLE){
+    r -= (rouletteWeightMult[seg.key] || 1);
+    if(r <= 0) return seg;
+  }
+  return ROULETTE_TABLE[ROULETTE_TABLE.length - 1];
 }
 function spinRouletteWheelTo(midDeg){
   const spins = 5;
@@ -5164,6 +5296,119 @@ rouletteSpinBtn.addEventListener('click', () => {
     rouletteSpinning = false;
   }, 4700);
 });
+
+// ---------- Slot probability editor ----------
+const SLOT_EDIT_LABELS = { bell:'ベル', melon:'スイカ', cherry:'チェリー', bar:'BAR', seven:'セブン', replay:'リプレイ' };
+const slotEditBtn = document.getElementById('slotEditBtn');
+const slotEditModal = document.getElementById('slotEditModal');
+const slotEditRows = document.getElementById('slotEditRows');
+if(slotEditBtn){
+  slotEditBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    slotEditRows.innerHTML = '';
+    UNIFIED_TABLE.outcomes.forEach((o, i) => {
+      const row = document.createElement('div');
+      row.className = 'edit-row';
+      row.innerHTML = `<span>${SLOT_EDIT_LABELS[o.sym] || o.sym}</span><input type="number" min="0" step="1" value="${o.weight}" data-idx="${i}">`;
+      slotEditRows.appendChild(row);
+    });
+    const loseWeight = UNIFIED_TABLE.total - UNIFIED_TABLE.outcomes.reduce((s,o) => s+o.weight, 0);
+    const loseRow = document.createElement('div');
+    loseRow.className = 'edit-row';
+    loseRow.innerHTML = `<span>ハズレ</span><input type="number" min="0" step="1" value="${loseWeight}" id="slotEditLose">`;
+    slotEditRows.appendChild(loseRow);
+    slotEditModal.style.display = 'flex';
+  });
+}
+document.getElementById('slotEditCancel').addEventListener('click', () => { slotEditModal.style.display = 'none'; });
+document.getElementById('slotEditSave').addEventListener('click', () => {
+  const inputs = slotEditRows.querySelectorAll('input[data-idx]');
+  inputs.forEach(inp => {
+    const idx = parseInt(inp.dataset.idx, 10);
+    const v = Math.max(0, parseInt(inp.value, 10) || 0);
+    UNIFIED_TABLE.outcomes[idx].weight = v;
+  });
+  const loseV = Math.max(0, parseInt(document.getElementById('slotEditLose').value, 10) || 0);
+  UNIFIED_TABLE.total = UNIFIED_TABLE.outcomes.reduce((s,o) => s+o.weight, 0) + loseV;
+  renderPaytable();
+  slotEditModal.style.display = 'none';
+});
+
+// ---------- Roulette probability editor ----------
+const rouletteEditBtn = document.getElementById('rouletteEditBtn');
+const rouletteEditModal = document.getElementById('rouletteEditModal');
+const rouletteEditRows = document.getElementById('rouletteEditRows');
+if(rouletteEditBtn){
+  rouletteEditBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    rouletteEditRows.innerHTML = '';
+    Object.keys(ROULETTE_SEG_INFO).forEach(label => {
+      const key = ROULETTE_SEG_INFO[label].key;
+      const name = label === 'jackpot' ? 'JACKPOT' : ('x' + label);
+      const row = document.createElement('div');
+      row.className = 'edit-row';
+      row.innerHTML = `<span>${name}</span><input type="number" min="0" step="0.1" value="${rouletteWeightMult[key]}" data-key="${key}">`;
+      rouletteEditRows.appendChild(row);
+    });
+    rouletteEditModal.style.display = 'flex';
+  });
+}
+document.getElementById('rouletteEditCancel').addEventListener('click', () => { rouletteEditModal.style.display = 'none'; });
+document.getElementById('rouletteEditSave').addEventListener('click', () => {
+  const inputs = rouletteEditRows.querySelectorAll('input[data-key]');
+  inputs.forEach(inp => {
+    const key = inp.dataset.key;
+    const v = Math.max(0, parseFloat(inp.value) || 0);
+    rouletteWeightMult[key] = v;
+  });
+  rouletteEditModal.style.display = 'none';
+});
+
+// ---------- Free-drag position editing ----------
+function enableDragMove(el, btn){
+  if(!el || !btn) return;
+  let active = false, dragging = false, startX, startY, startLeftPx, startTopPx;
+  const container = el.offsetParent || el.parentElement;
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    active = !active;
+    btn.classList.toggle('active', active);
+    el.classList.toggle('drag-target', active);
+  });
+  el.addEventListener('pointerdown', (e) => {
+    if(!active) return;
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = el.getBoundingClientRect();
+    const contRect = container.getBoundingClientRect();
+    const usesCenterTransform = el.id === 'rouletteWheelWrap';
+    if(usesCenterTransform){
+      startLeftPx = rect.left + rect.width/2 - contRect.left;
+      startTopPx = rect.top + rect.height/2 - contRect.top;
+    } else {
+      startLeftPx = rect.left - contRect.left;
+      startTopPx = rect.top - contRect.top;
+    }
+    el.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  el.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    el.style.left = (startLeftPx + dx) + 'px';
+    el.style.top = (startTopPx + dy) + 'px';
+    e.preventDefault();
+  });
+  el.addEventListener('pointerup', (e) => {
+    dragging = false;
+    try{ el.releasePointerCapture(e.pointerId); }catch(err){}
+  });
+  el.addEventListener('pointercancel', () => { dragging = false; });
+}
+enableDragMove(document.getElementById('rouletteWheelWrap'), document.getElementById('rouletteMoveBtn'));
+enableDragMove(document.getElementById('slotMachineWrap'), document.getElementById('slotMoveBtn'));
 
 </script>
 </body>
