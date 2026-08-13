@@ -181,6 +181,11 @@
     font-size: 0.72rem;
     color: #f0e2ae;
   }
+  .edit-frac{
+    color: #d8c9a0;
+    font-size: 0.72rem;
+    margin-left: auto;
+  }
   .edit-row input{
     width: 64px;
     font-size: 0.72rem;
@@ -2171,7 +2176,7 @@
         </div>
       </div>
       <div class="slot-stats" id="slotStats"></div>
-      <div class="slot-freespins" id="slotFreeSpinsDisplay" style="display:none;"></div>
+      <div class="slot-freespins" id="slotFreeSpinsDisplay"></div>
     </div>
 
     <div id="pokerCenter" style="display:none;">
@@ -3621,10 +3626,6 @@ function pushSlotHistory(entry){
 function renderSlotFreeSpins(){
   const el = document.getElementById('slotFreeSpinsDisplay');
   if(!el) return;
-  if(slotFreeSpins <= 0){
-    el.style.display = 'none';
-    return;
-  }
   el.style.display = 'flex';
   el.innerHTML = `<div class="fs-icon" style="background-image:url('${SYMBOL_URIS['replay']}')"></div><div class="fs-count">×${slotFreeSpins}</div>`;
 }
@@ -3689,6 +3690,7 @@ function renderPaytable(){
 }
 renderPaytable();
 renderSlotHistory();
+renderSlotFreeSpins();
 renderSlotStats();
 
 function updateSlotBetControls(){
@@ -5307,29 +5309,36 @@ if(slotEditBtn){
     e.stopPropagation();
     slotEditRows.innerHTML = '';
     UNIFIED_TABLE.outcomes.forEach((o, i) => {
+      const denom = o.weight > 0 ? Math.round(UNIFIED_TABLE.total / o.weight) : 0;
       const row = document.createElement('div');
       row.className = 'edit-row';
-      row.innerHTML = `<span>${SLOT_EDIT_LABELS[o.sym] || o.sym}</span><input type="number" min="0" step="1" value="${o.weight}" data-idx="${i}">`;
+      row.innerHTML = `<span>${SLOT_EDIT_LABELS[o.sym] || o.sym}</span><span class="edit-frac">1/</span><input type="number" min="1" step="1" value="${denom}" data-idx="${i}">`;
       slotEditRows.appendChild(row);
     });
     const loseWeight = UNIFIED_TABLE.total - UNIFIED_TABLE.outcomes.reduce((s,o) => s+o.weight, 0);
+    const loseDenom = loseWeight > 0 ? Math.round(UNIFIED_TABLE.total / loseWeight) : 0;
     const loseRow = document.createElement('div');
     loseRow.className = 'edit-row';
-    loseRow.innerHTML = `<span>ハズレ</span><input type="number" min="0" step="1" value="${loseWeight}" id="slotEditLose">`;
+    loseRow.innerHTML = `<span>ハズレ</span><span class="edit-frac">1/</span><input type="number" min="1" step="1" value="${loseDenom}" id="slotEditLose">`;
     slotEditRows.appendChild(loseRow);
     slotEditModal.style.display = 'flex';
   });
 }
 document.getElementById('slotEditCancel').addEventListener('click', () => { slotEditModal.style.display = 'none'; });
 document.getElementById('slotEditSave').addEventListener('click', () => {
+  const FIXED_TOTAL = 100000;
   const inputs = slotEditRows.querySelectorAll('input[data-idx]');
+  let sumWeights = 0;
   inputs.forEach(inp => {
     const idx = parseInt(inp.dataset.idx, 10);
-    const v = Math.max(0, parseInt(inp.value, 10) || 0);
-    UNIFIED_TABLE.outcomes[idx].weight = v;
+    const denom = Math.max(1, parseInt(inp.value, 10) || 1);
+    const w = Math.round(FIXED_TOTAL / denom);
+    UNIFIED_TABLE.outcomes[idx].weight = w;
+    sumWeights += w;
   });
-  const loseV = Math.max(0, parseInt(document.getElementById('slotEditLose').value, 10) || 0);
-  UNIFIED_TABLE.total = UNIFIED_TABLE.outcomes.reduce((s,o) => s+o.weight, 0) + loseV;
+  const loseDenom = Math.max(1, parseInt(document.getElementById('slotEditLose').value, 10) || 1);
+  const loseW = Math.max(0, Math.round(FIXED_TOTAL / loseDenom));
+  UNIFIED_TABLE.total = sumWeights + loseW;
   renderPaytable();
   slotEditModal.style.display = 'none';
 });
@@ -5342,12 +5351,17 @@ if(rouletteEditBtn){
   rouletteEditBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     rouletteEditRows.innerHTML = '';
+    const counts = {};
+    ROULETTE_TABLE.forEach(seg => { counts[seg.key] = (counts[seg.key]||0) + 1; });
+    const totalWeighted = ROULETTE_TABLE.reduce((s,seg) => s + (rouletteWeightMult[seg.key] || 1), 0);
     Object.keys(ROULETTE_SEG_INFO).forEach(label => {
       const key = ROULETTE_SEG_INFO[label].key;
       const name = label === 'jackpot' ? 'JACKPOT' : ('x' + label);
+      const categoryWeight = counts[key] * (rouletteWeightMult[key] || 1);
+      const denom = categoryWeight > 0 ? Math.round(totalWeighted / categoryWeight) : 0;
       const row = document.createElement('div');
       row.className = 'edit-row';
-      row.innerHTML = `<span>${name}</span><input type="number" min="0" step="0.1" value="${rouletteWeightMult[key]}" data-key="${key}">`;
+      row.innerHTML = `<span>${name}</span><span class="edit-frac">1/</span><input type="number" min="1" step="1" value="${denom}" data-key="${key}" data-count="${counts[key]}">`;
       rouletteEditRows.appendChild(row);
     });
     rouletteEditModal.style.display = 'flex';
@@ -5355,11 +5369,14 @@ if(rouletteEditBtn){
 }
 document.getElementById('rouletteEditCancel').addEventListener('click', () => { rouletteEditModal.style.display = 'none'; });
 document.getElementById('rouletteEditSave').addEventListener('click', () => {
+  const FIXED_TOTAL = 100000;
   const inputs = rouletteEditRows.querySelectorAll('input[data-key]');
   inputs.forEach(inp => {
     const key = inp.dataset.key;
-    const v = Math.max(0, parseFloat(inp.value) || 0);
-    rouletteWeightMult[key] = v;
+    const count = parseInt(inp.dataset.count, 10) || 1;
+    const denom = Math.max(1, parseInt(inp.value, 10) || 1);
+    const categoryWeight = FIXED_TOTAL / denom;
+    rouletteWeightMult[key] = categoryWeight / count;
   });
   rouletteEditModal.style.display = 'none';
 });
@@ -5409,6 +5426,9 @@ function enableDragMove(el, btn){
 }
 enableDragMove(document.getElementById('rouletteWheelWrap'), document.getElementById('rouletteMoveBtn'));
 enableDragMove(document.getElementById('slotMachineWrap'), document.getElementById('slotMoveBtn'));
+enableDragMove(document.getElementById('slotPaytableCompact'), document.getElementById('slotMoveBtn'));
+enableDragMove(document.getElementById('slotStats'), document.getElementById('slotMoveBtn'));
+enableDragMove(document.getElementById('slotFreeSpinsDisplay'), document.getElementById('slotMoveBtn'));
 
 </script>
 </body>
