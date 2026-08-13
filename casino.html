@@ -98,6 +98,62 @@
     background: rgba(109,255,176,0.25);
     border-color: rgba(109,255,176,0.6);
   }
+  #bgChangeBtn{
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(212,175,90,0.5);
+    background: rgba(0,0,0,0.5);
+    color: #f0e2ae;
+    font-size: 0.65rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bg-scope-modal{
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bg-scope-box{
+    background: #1a1410;
+    border: 1px solid rgba(212,175,90,0.6);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 76%;
+    max-width: 280px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .bg-scope-title{
+    text-align: center;
+    color: #f0e2ae;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+  .bg-scope-btn{
+    font-family: Georgia, serif;
+    font-size: 0.8rem;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(212,175,90,0.5);
+    background: rgba(212,175,90,0.18);
+    color: #f0e2ae;
+    cursor: pointer;
+  }
+  .bg-scope-btn:active{
+    background: rgba(212,175,90,0.35);
+  }
   .center-table{
     flex: 1 1 auto;
     min-height: 0;
@@ -1868,6 +1924,8 @@
       <button class="tab-btn" id="tabSLOT">🎰 Slot</button>
       <button class="tab-btn" id="tabROUL">🎡 Roulette</button>
       <button id="soundToggleBtn" title="サウンド有効化">🔇</button>
+      <button id="bgChangeBtn" title="背景変更">🖼️</button>
+      <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
     </div>
   </div>
 
@@ -2229,6 +2287,14 @@
   <div class="hud">
     <div class="stat"><span class="label">Balance</span><span class="value" id="balanceVal">10000</span><span class="balance-fee-flash" id="balanceFeeFlash"></span></div>
     <div class="stat stat-right" id="betStat"><span class="label" id="betLabel">Bet</span><span class="value" id="betVal">0</span></div>
+  </div>
+</div>
+
+<div id="bgScopeModal" class="bg-scope-modal" style="display:none;">
+  <div class="bg-scope-box">
+    <div class="bg-scope-title">この背景をどこに適用しますか？</div>
+    <button id="bgScopeAll" class="bg-scope-btn">全ゲームに適用</button>
+    <button id="bgScopeOne" class="bg-scope-btn">このゲームのみ</button>
   </div>
 </div>
 
@@ -3257,6 +3323,43 @@ const tabSLOT = document.getElementById('tabSLOT');
 const tabPOKER = document.getElementById('tabPOKER');
 const tabROUL = document.getElementById('tabROUL');
 const centerTableEl = document.getElementById('pageWrap');
+let customBackgrounds = {};
+let currentGameKey = 'bj';
+const bgChangeBtn = document.getElementById('bgChangeBtn');
+const bgFileInput = document.getElementById('bgFileInput');
+if(bgChangeBtn && bgFileInput){
+  bgChangeBtn.addEventListener('click', () => {
+    bgFileInput.click();
+  });
+  bgFileInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      pendingBgDataUrl = ev.target.result;
+      document.getElementById('bgScopeModal').style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+    bgFileInput.value = '';
+  });
+}
+let pendingBgDataUrl = null;
+const bgScopeModal = document.getElementById('bgScopeModal');
+const bgScopeAllBtn = document.getElementById('bgScopeAll');
+const bgScopeOneBtn = document.getElementById('bgScopeOne');
+function applyPendingBg(applyAll){
+  if(!pendingBgDataUrl) return;
+  if(applyAll){
+    ['bj','bac','slot','poker','roul'].forEach(k => { customBackgrounds[k] = pendingBgDataUrl; });
+  } else {
+    customBackgrounds[currentGameKey] = pendingBgDataUrl;
+  }
+  centerTableEl.style.backgroundImage = `url('${pendingBgDataUrl}')`;
+  pendingBgDataUrl = null;
+  bgScopeModal.style.display = 'none';
+}
+if(bgScopeAllBtn) bgScopeAllBtn.addEventListener('click', () => applyPendingBg(true));
+if(bgScopeOneBtn) bgScopeOneBtn.addEventListener('click', () => applyPendingBg(false));
 const bjCenter = document.getElementById('bjCenter');
 const bacCenter = document.getElementById('bacCenter');
 const slotCenter = document.getElementById('slotCenter');
@@ -3292,6 +3395,8 @@ function switchTab(target){
     });
     centerTableEl.classList.remove('bg-bj', 'bg-bac', 'bg-slot', 'bg-poker', 'bg-roul');
     centerTableEl.classList.add('bg-' + target);
+    currentGameKey = target;
+    centerTableEl.style.backgroundImage = customBackgrounds[target] ? `url('${customBackgrounds[target]}')` : '';
     centerTableEl.style.opacity = '1';
     setTimeout(() => { tabSwitching = false; }, 220);
   }, 200);
@@ -4967,6 +5072,7 @@ function showRouletteResultOverlay(word, payout, breakdown){
   if(payout > 0){
     payEl.textContent = '+' + fmt(payout);
     payEl.style.display = 'block';
+    playWinSound(payout);
   } else {
     payEl.style.display = 'none';
   }
