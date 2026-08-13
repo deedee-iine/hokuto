@@ -78,65 +78,41 @@
     position: relative;
     z-index: 1;
   }
-  #soundToggleBtn{
+  #settingsBtn{
     flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     border: 1px solid rgba(212,175,90,0.5);
     background: rgba(0,0,0,0.5);
     color: #f0e2ae;
-    font-size: 0.7rem;
+    font-size: 1rem;
     line-height: 1;
     cursor: pointer;
     z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  #soundToggleBtn.on{
-    background: rgba(109,255,176,0.25);
-    border-color: rgba(109,255,176,0.6);
-  }
-  #bgChangeBtn{
-    flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1px solid rgba(212,175,90,0.5);
-    background: rgba(0,0,0,0.5);
-    color: #f0e2ae;
-    font-size: 0.65rem;
-    line-height: 1;
-    cursor: pointer;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #bgmBtn{
-    flex: 0 0 auto;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1px solid rgba(212,175,90,0.5);
-    background: rgba(0,0,0,0.5);
-    color: #f0e2ae;
-    font-size: 0.65rem;
-    line-height: 1;
-    cursor: pointer;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #bgmBtn.on{
-    background: rgba(109,255,176,0.25);
-    border-color: rgba(109,255,176,0.6);
   }
   .bgm-track-btn.playing{
     background: rgba(109,255,176,0.3);
     border-color: rgba(109,255,176,0.8);
+  }
+  .settings-section-title{
+    color: var(--gold-bright);
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    margin-top: 6px;
+    margin-bottom: -2px;
+    text-align: left;
+    padding-left: 2px;
+  }
+  #settingsSoundToggle.on{
+    background: rgba(109,255,176,0.3);
+    border-color: rgba(109,255,176,0.8);
+  }
+  .settings-box{
+    max-height: 82vh;
   }
   .bg-scope-modal{
     position: fixed;
@@ -2048,9 +2024,7 @@
       <button class="tab-btn" id="tabPOKER">♣ Poker</button>
       <button class="tab-btn" id="tabSLOT">🎰 Slot</button>
       <button class="tab-btn" id="tabROUL">🎡 Roulette</button>
-      <button id="soundToggleBtn" title="サウンド有効化">🔇</button>
-      <button id="bgChangeBtn" title="背景変更">🖼️</button>
-      <button id="bgmBtn" title="BGM">🎵</button>
+      <button id="settingsBtn" title="設定">⚙️</button>
       <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
     </div>
   </div>
@@ -2454,14 +2428,23 @@
   </div>
 </div>
 
-<div id="bgmModal" class="bg-scope-modal" style="display:none;">
-  <div class="bg-scope-box">
-    <div class="bg-scope-title">BGM選択</div>
+<div id="settingsModal" class="bg-scope-modal" style="display:none;">
+  <div class="edit-modal-box settings-box">
+    <div class="bg-scope-title">設定</div>
+
+    <div class="settings-section-title">サウンド</div>
+    <button class="bg-scope-btn" id="settingsSoundToggle">🔇 サウンド: OFF</button>
+
+    <div class="settings-section-title">BGM</div>
     <button class="bg-scope-btn bgm-track-btn" data-idx="0">赤いチップ</button>
     <button class="bg-scope-btn bgm-track-btn" data-idx="1">静かな勝利</button>
     <button class="bg-scope-btn bgm-track-btn" data-idx="2">煌めくルーレット</button>
-    <button class="bg-scope-btn edit-cancel" id="bgmStopBtn">停止</button>
-    <button class="bg-scope-btn edit-cancel" id="bgmCloseBtn">閉じる</button>
+    <button class="bg-scope-btn edit-cancel" id="bgmStopBtn">BGM停止</button>
+
+    <div class="settings-section-title">背景</div>
+    <button class="bg-scope-btn" id="settingsBgChangeBtn">🖼️ 背景を変更</button>
+
+    <button class="bg-scope-btn edit-cancel" id="settingsCloseBtn">閉じる</button>
   </div>
 </div>
 
@@ -2611,15 +2594,15 @@ function unlockAudio(){
   updateSoundBtn();
 }
 function updateSoundBtn(){
-  const btn = document.getElementById('soundToggleBtn');
+  const btn = document.getElementById('settingsSoundToggle');
   if(!btn) return;
-  btn.textContent = _soundEnabled ? '🔊' : '🔇';
+  btn.textContent = _soundEnabled ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
   btn.classList.toggle('on', _soundEnabled);
 }
 document.addEventListener('pointerdown', unlockAudio);
 document.addEventListener('touchstart', unlockAudio);
 document.addEventListener('click', unlockAudio);
-const soundToggleBtn = document.getElementById('soundToggleBtn');
+const soundToggleBtn = document.getElementById('settingsSoundToggle');
 let _soundBtnClicked = false;
 if(soundToggleBtn){
   soundToggleBtn.addEventListener('click', (e) => {
@@ -2636,6 +2619,7 @@ if(soundToggleBtn){
     updateSoundBtn();
   });
 }
+updateSoundBtn();
 function playSoundReliable(baseAudio, offset){
   try{
     const node = baseAudio.cloneNode(true);
@@ -3510,7 +3494,7 @@ const tabROUL = document.getElementById('tabROUL');
 const centerTableEl = document.getElementById('pageWrap');
 let customBackgrounds = {};
 let currentGameKey = 'bj';
-const bgChangeBtn = document.getElementById('bgChangeBtn');
+const bgChangeBtn = document.getElementById('settingsBgChangeBtn');
 const bgFileInput = document.getElementById('bgFileInput');
 if(bgChangeBtn && bgFileInput){
   bgChangeBtn.addEventListener('click', () => {
@@ -5435,20 +5419,20 @@ document.getElementById('rouletteEditSave').addEventListener('click', () => {
   rouletteEditModal.style.display = 'none';
 });
 
-// ---------- BGM ----------
-const bgmBtn = document.getElementById('bgmBtn');
-const bgmModal = document.getElementById('bgmModal');
+// ---------- Settings modal (Sound / BGM / Background) ----------
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
 function refreshBgmTrackButtons(){
   document.querySelectorAll('.bgm-track-btn').forEach(b => {
     b.classList.toggle('playing', parseInt(b.dataset.idx,10) === currentBgmIndex);
   });
-  bgmBtn.classList.toggle('on', currentBgmIndex >= 0);
 }
-if(bgmBtn){
-  bgmBtn.addEventListener('click', (e) => {
+if(settingsBtn){
+  settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    bgmModal.style.display = 'flex';
+    settingsModal.style.display = 'flex';
     refreshBgmTrackButtons();
+    updateSoundBtn();
   });
 }
 document.querySelectorAll('.bgm-track-btn').forEach(b => {
@@ -5462,8 +5446,8 @@ document.getElementById('bgmStopBtn').addEventListener('click', () => {
   stopBgm();
   refreshBgmTrackButtons();
 });
-document.getElementById('bgmCloseBtn').addEventListener('click', () => {
-  bgmModal.style.display = 'none';
+document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+  settingsModal.style.display = 'none';
 });
 
 // ---------- Free-drag position editing ----------
